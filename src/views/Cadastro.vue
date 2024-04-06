@@ -4,7 +4,7 @@
     <div>
         <Card class="Cadastre-se">
             <template #header>
-                <img src="../assets/486-4864616_generic-company-logo-png-example-logo-png-transparent.png" />
+                <img src="../assets/cultiveselogo.webp" />
 
             </template>
             <!--  <template #title>
@@ -17,6 +17,11 @@
                 <div class="formularioDiv">
                     <InputText class="formulario" id="email" type="text" v-model="email" placeholder="E-mail" />
                     <p></p>
+                    <InputText class="formulario" id="nome" type="text" v-model="nome" placeholder="Nome" />
+                    <p></p>
+                    <InputMask class="formulario" id="telefone" v-model="telefone" mask="(99)99999-9999"
+                        placeholder="Telefone" />
+                    <p></p>
                     <Password class="formulario" v-model="password" toggleMask placeholder="Senha" :feedback="false" />
                     <p v-if="errMsg"></p>
                     <Password class="formulario" v-model="passwordConfirmation" toggleMask placeholder="Confirme senha"
@@ -26,7 +31,7 @@
                 </div>
             </template>
             <template #footer>
-                <Button icon="pi pi-check" label="Entrar" @click="register" />
+                <Button icon="pi pi-check" label="Cadastrar" @click="register" />
             </template>
         </Card>
     </div>
@@ -42,6 +47,7 @@ import router from '@/router';
 
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
+import InputMask from "primevue/inputmask";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import InlineMessage from 'primevue/inlinemessage';
@@ -50,9 +56,13 @@ import InlineMessage from 'primevue/inlinemessage';
 import { registrar } from '@/services/firebase';
 
 import { useUserStore } from "../stores/user";
+const userStore = useUserStore();
 
 
 const email = ref("");
+const nome = ref("");
+const telefone = ref("");
+
 const password = ref("");
 const passwordConfirmation = ref("");
 const errMsg = ref()
@@ -61,7 +71,8 @@ const register = () => {
         createUserWithEmailAndPassword(getAuth(), email.value, password.value)
             .then((data) => {
                 console.log("Registrado com Sucesso")
-                router.push('/feed')
+                userStore.cadastraEmail({ telefone: telefone.value, email: email.value, nome: nome.value, uid: data.user.uid })
+                router.push('/Perfil')
             })
     }
     else {

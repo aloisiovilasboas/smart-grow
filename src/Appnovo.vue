@@ -63,7 +63,7 @@ onMounted(() => {
 const handleSignOut = () => {
 
     signOut(auth).then(() => {
-        userStore.setAuthUser(null)
+        /* userStore.setAuthUser(null) */
         /*     apostasStore.setCampeao([])
             apostasStore.setGrupos([])
             apostasStore.setMatamata([])

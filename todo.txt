@@ -1,0 +1,90 @@
+Arrumar index.router
+
+- Login
+    OK
+- Cadastro
+    add Nome
+    Ok
+- Home
+    se deslogado (Botoes Login/Registre)
+    se logado (Botoes Painel, Perfil e Admin (se admin))
+- Perfil
+    Nome
+    email
+    card atividades realizadas
+- Admin
+    usuarios
+        editar papeis (nao apto, colaborador, admin)
+- Painel. Abas:
+    - Atividades Diárias: (badge notificacao se houver algum plantio) Cards: 
+        - plantio  (badge notificacao se houver algum plantio)
+            lista de todos os plantios em estado 'esperando plantio'
+                botao iniciar plantio
+                    botao iniciarPlantio
+                    botao finalizarPlantio
+                  
+                    add numBandejas
+                    add timestamp
+                    add idUsuarioPlantio
+                    add lote e plantio e etapa no perfil do usuario
+        - blackout (badge notificacao se houver algum plantio)
+            lista de todos os plantios em estado 'esperando blackout'
+                botao transferir para blackout
+                    add userIdBlackout
+                    add timestamp blackout
+                    add lote plantio e etapa no perfil do usuario
+        - estufa  (badge notificacao se houver algum plantio)
+            lista de todos os plantios em estado     'esperando estufa'
+                botao transferir para estufa
+                    add userIdEstufa
+                    add timestamp estufa
+                    add lote plantio e etapa no perfil do usuario
+        - colheita  (badge notificacao se houver algum plantio em algum lote)
+            lista de todos os plantios por lote em estado 'esperando colheita'
+                botao fazer colheita para cada plantio
+                    add lote plantio e etapa no perfil do usuario
+                    add userIdColheita
+                    add timestamp
+                    add gramasColhidas
+                depois de feita a colheita de todos os plantios, habilita botao finalizar lote
+                    add numero de caixas
+                    
+    -caixas
+        estimativa de venda de caixas por tipo de lote (por sexta e por terça) (ou por dia da semana) 
+
+        caixas produzidas por lotes
+        caixas produzidas por sobras
+            marcar vendas das caixas por comprador
+
+    -lotes 
+        crud lote(admin)
+            sujerir lotes pela estimativa de venda
+            campo calculado: estimativaDeCaixas (de acordo com especSementes)            
+            _para cada lote_
+                campo calculado: estimativaEmGramas (de acordo com especSementes)
+                botao gerar etiquetas
+                _crud_ plantio
+                    selecionar semente
+
+    - especificacoes (admin) abas:
+        - Sementes
+            _crud_ especSementes
+            add estimativa producao por bandeja em especSementes
+        - Embalagens
+            _crud_ especEmbalagens
+        - Outras
+            _crud_ especOutras
+            
+
+    - sementes (admin)
+        _crud_ Sementes
+        lotes por semente
+
+perguntas felipe:
+onde encaixa as vendas
+
+    
+    
+    
+
+

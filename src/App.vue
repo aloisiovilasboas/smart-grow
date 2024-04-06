@@ -1,3 +1,48 @@
+<template>
+
+  <div class="cssrouterview">
+    <div v-if="loadingstore.loading">
+      <h3>Carregando...</h3>
+      <ProgressSpinner />
+    </div>
+    <router-view v-else />
+  </div>
+  <div class="cssmenu">
+    <Toolbar fixed class="barra">
+      <template #start>
+        <Button icon="pi pi-bars" class="p-button-rounded p-button-Primary p-button-text" @click="visibleLeft = true" />
+        <h4> Cultive-se </h4>
+      </template>
+    </Toolbar>
+    <div class="card">
+      <Sidebar v-model:visible="visibleLeft">
+        <div class="card">
+          <div class="card-container yellow-container">
+            <!-- # router link para o home com a logo -->
+            <router-link to="/" @click.native="InlineButtonClickHandler">
+              <Button class="p-button-text button-sidebar">
+                <span class="p-button-icon p-button-icon-left"><img src="./assets/cultiveselogo.webp"
+                    height="50"></span>
+              </Button>
+            </router-link>
+            <!-- um router link para cada intem na lista de links chamada links utilizando v-for -->
+            <router-link v-for="link in links" :key="link.name" :to="link.path"
+              @click.native="InlineButtonClickHandler">
+              <h2>{{ link }}</h2>
+              <Button class="p-button-text button-sidebar">
+                <span class="p-button-label">{{ link.name }}</span>
+              </Button>
+            </router-link>
+
+            <Button label="Sair" class="p-button-text button-sidebar" icon="pi pi-sign-out" @click="handleSignOut" />
+
+          </div>
+        </div>
+      </Sidebar>
+    </div>
+  </div>
+</template>
+
 <script setup>
 
 import { onMounted, ref } from "vue";
@@ -21,10 +66,18 @@ import { useUsuariosStore } from "./stores/usuarios"
 
 
 const visibleLeft = ref(false);
-const isLoggedIn = ref(false);
+
 const userStore = useUserStore();
 const usuariosStore = useUsuariosStore();
 const loadingstore = useLoadingStore();
+const links = [
+
+  { name: "Login", path: "/Login", show: true /* userStore. */ },
+  { name: "Cadastro", path: "/Cadastro", show: true /* !isLoggedIn.value  */ },
+  { name: "Admin", path: "/Admin", show: userStore.isAdmin },
+  { name: "Perfil", path: "/Perfil", show: true /* isLoggedIn.value */ },
+
+];
 
 const InlineButtonClickHandler = () => {
   visibleLeft.value = !visibleLeft.value
@@ -32,26 +85,28 @@ const InlineButtonClickHandler = () => {
 
 let auth;
 
-onMounted(() => {
+/* onMounted( () => {
   auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      isLoggedIn.value = true;
+      console.log(user);
       //  apostasStore.fetchApostaById(user.uid)
-      usuariosStore.getIsAdmin(user.uid)
+      // user.getIsAdmin(user.uid)
+      // user.getIsAdmin(user.uid)
+       
       //      console.log('admin: '+usuariosStore.isAdmin);
 
     } else {
       isLoggedIn.value = false;
     }
   });
-});
+}); */
 
 
 const handleSignOut = () => {
-
+  auth = getAuth();
   signOut(auth).then(() => {
-    userStore.setAuthUser(null)
+    userStore.resetUser()
     usuariosStore.setUsuarios([])
     usuariosStore.setIsAdmin(false)
     router.push("/");
@@ -60,67 +115,6 @@ const handleSignOut = () => {
 };
 
 </script>
-
-<template>
-
-  <div class="cssrouterview">
-    <div v-if="loadingstore.loading">
-      <h3>Carregando...</h3>
-      <ProgressSpinner />
-    </div>
-    <router-view v-else />
-  </div>
-  <div class="cssmenu">
-    <Toolbar fixed class="barra">
-      <template #start>
-        <Button icon="pi pi-bars" class="p-button-rounded p-button-Primary p-button-text" @click="visibleLeft = true" />
-        <h4> Template App </h4>
-      </template>
-    </Toolbar>
-    <div class="card">
-      <Sidebar v-model:visible="visibleLeft">
-        <div class="card">
-          <div class="card-container yellow-container">
-            <router-link to="/" @click.native="InlineButtonClickHandler">
-              <Button class="p-button-text button-sidebar">
-                <span class="p-button-icon p-button-icon-left"><img
-                    src="./assets/486-4864616_generic-company-logo-png-example-logo-png-transparent.png"
-                    height="50"></span>
-
-              </Button>
-            </router-link>
-            <router-link to="/Signin" @click.native="InlineButtonClickHandler">
-              <Button class="p-button-text button-sidebar" v-if="!isLoggedIn">
-                <span class="p-button-label">Logar</span>
-              </Button>
-
-            </router-link>
-
-            <router-link to="/Register" @click.native="InlineButtonClickHandler">
-              <Button class="p-button-text button-sidebar" v-if="!isLoggedIn">
-                <span class="p-button-label"> Registrar </span>
-              </Button>
-
-            </router-link>
-            <router-link to="/Admin" @click.native="InlineButtonClickHandler">
-              <Button class="p-button-text button-sidebar" v-if="usuariosStore.isAdmin">
-                <span class="p-button-label"> Admin </span>
-              </Button>
-
-            </router-link>
-
-            <Button label="Sair" class="p-button-text button-sidebar"
-              icon="pi pi-sign-out                                  " @click="handleSignOut" v-if="isLoggedIn" />
-            <!-- <RouterLink to="/">Home</RouterLink>
-            <RouterLink to="/Feed">Feed</RouterLink>
-            <RouterLink to="/Signin">Sign in</RouterLink>
-            <RouterLink to="/Register">Register</RouterLink> -->
-          </div>
-        </div>
-      </Sidebar>
-    </div>
-  </div>
-</template>
 
 <style>
 .app {

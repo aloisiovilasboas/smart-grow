@@ -24,6 +24,7 @@ const router = createRouter({
       path: "/",
       component: Home,
     },
+
     {
       path: "/perfil",
       component: Perfil,
@@ -54,6 +55,7 @@ const router = createRouter({
 });
 
 const getCurrentUser = () => {
+  /* console.log(getAuth().currentUser); */
   return new Promise((resolve, reject) => {
     onAuthStateChanged(getAuth(), (user) => {
       if (user) {
@@ -77,18 +79,19 @@ const getDetalhesUsuario = (id) => {
   });
 };
 
-const getUsuarioLogado = () => {
+const setDetalhesUser = () => {
   return new Promise((resolve, reject) => {
     getCurrentUser()
       .then((u) => {
         if (u) {
-          getDetalhesUsuario(u.uid).then((d) => {
-            if (d) {
-              d.id = u.uid;
-              /*  console.log(d); */
-              resolve(d);
+          getDetalhesUsuario(u.uid).then((doc) => {
+            if (doc) {
+              const user = { ...doc.data(), id: u.uid };
+              const userStore = useUserStore();
+              userStore.setUser(user);
+              resolve(user);
             } else {
-              reject("não logado");
+              reject("Erro ao buscar detalhes do usuário");
             }
           });
         }
@@ -101,48 +104,58 @@ const getUsuarioLogado = () => {
 
 router.beforeEach(async (to, from, next) => {
   const loadingStore = useLoadingStore();
-  const userStore = useUserStore();
   loadingStore.loading = true;
-  await getUsuarioLogado()
-    .then((u) => {
-      if (u) {
-        userStore.setUser(u);
-      } else {
-        userStore.resetUser();
-        console.log("erro");
-      }
-    })
-    .catch((e) => {
-      userStore.resetUser();
-      /* console.log(e); */
-    });
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (userStore.user.id) {
-      next();
-    } else {
-      alert("Você não está logado");
-      next("/login");
-    }
+    //console.log('requiresauth');
+    await getCurrentUser()
+      .then((u) => {
+        if (u) {
+          /*  const userStore = useUserStore();
+          userStore.setAuthUser(u); */
+
+          next();
+        } else {
+          alert("Você não está logado");
+          next("/login");
+        }
+        /* loadingStore.loading = false; */
+      })
+      .catch((e) => {
+        console.log(e);
+        alert(e);
+        next("/login");
+        /*  loadingStore.loading = false; */
+      });
   } else if (to.matched.some((record) => record.meta.requiresDeslogado)) {
-    if (userStore.user.id) {
-      alert("Você já está logado");
-      next("/");
-    } else {
-      next();
-    }
-  } else if (to.matched.some((record) => record.meta.requiresAdmin)) {
-    if (userStore.user.id) {
-      if (userStore.user.admin) {
+    await getCurrentUser()
+      .then((u) => {
+        if (u) {
+          alert("Você já está logado");
+          next("/");
+        } else {
+          next();
+        }
+      })
+      .catch((e) => {
+        console.log(e);
         next();
-      } else {
-        next("/perfil");
-        alert("Você não é admin");
-      }
-    } else {
-      next("/login");
-      alert("Você não está logado");
-    }
+      });
+    /* loadingStore.loading = false; */
+  } else if (to.matched.some((record) => record.meta.requiresAdmin)) {
+    await getIsAdmin()
+      .then((isAdmin) => {
+        if (isAdmin) {
+          next();
+        } else {
+          next("/");
+          alert("Você não é admin");
+        }
+      })
+      .catch((e) => {
+        alert(e);
+        next("/");
+      });
   } else {
     next();
   }

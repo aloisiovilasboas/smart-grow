@@ -11,7 +11,16 @@
             <template #header>
                 <img src="../assets/cultiveselogo.webp" />
 
+                <h2>{{ 'nome: ' + userStore.user.nome }}</h2>
+                <h2>{{ 'email: ' + userStore.user.email }}</h2>
+                <h2>{{ 'telefone: ' + userStore.user.telefone }}</h2>
+
+                <h3>#todo tabela de atividades</h3>
+
             </template>
+
+
+
             <!--  <template #title>
                 Entre
             </template> -->
@@ -34,41 +43,30 @@ import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import InlineMessage from 'primevue/inlinemessage';
-import { ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "vue-router";
+
+import { useUserStore } from "../stores/user";
+import { auth } from "@/services/firebase";
+
+import { useLoadingStore } from "../stores/loading";
+
+const userStore = useUserStore();
+const loadingstore = useLoadingStore();
 
 const email = ref("");
 const password = ref("");
 const errMsg = ref() // ERROR MESSSAGE
 const router = useRouter()
 
-const register = () => {
-    signInWithEmailAndPassword(getAuth(), email.value, password.value)
-        .then((data) => {
-            console.log("Logado com Sucesso")
-            router.push('/')
-        }).catch((error) => {
-            console.log(error.code);
-            switch (error.code) {
-                case "auth/invalid-email":
-                    errMsg.value = "Email inválido";
-                    break;
-                case "auth/user-not-found":
-                    errMsg.value = "Não foi encontrada nenhuma conta com esse email";
-                    break;
-                case "auth/wrong-password":
-                    errMsg.value = "Senha incorreta";
-                    break;
-                case "auth/user-disabled":
-                    errMsg.value = "Usuário desabilitado";
-                    break;
-                default:
-                    errMsg.value = "Não foi possivel fazer o login";
-                    break;
-            }
-        })
-};
+/* onBeforeMount(() => {
+    loadingstore.setLoading(true)
+    userStore.fetchUsuarioById(auth.currentUser.uid).then(() => {
+        loadingstore.setLoading(false)
+    });
+}) */
+
 
 
 </script>

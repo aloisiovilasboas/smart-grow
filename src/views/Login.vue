@@ -56,8 +56,8 @@ const router = useRouter()
 const register = () => {
     signInWithEmailAndPassword(getAuth(), email.value, password.value)
         .then((data) => {
-            console.log("Logado com Sucesso")
-            router.push('/')
+            /*     console.log("Logado com Sucesso") */
+            router.push('/Perfil')
         }).catch((error) => {
             console.log(error.code);
             switch (error.code) {

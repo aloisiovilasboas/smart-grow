@@ -4,25 +4,24 @@ Arrumar index.router
     OK
 - Cadastro
     add Nome
+    add Telefone
     Ok
 - Home
     se deslogado (Botoes Login/Registre)
     se logado (Botoes Painel, Perfil e Admin (se admin))
+    ok
 - Perfil
     Nome
     email
     card atividades realizadas
-- Admin
-    usuarios
-        editar papeis (nao apto, colaborador, admin)
+
 - Painel. Abas:
     - Atividades Diárias: (badge notificacao se houver algum plantio) Cards: 
         - plantio  (badge notificacao se houver algum plantio)
             lista de todos os plantios em estado 'esperando plantio'
                 botao iniciar plantio
                     botao iniciarPlantio
-                    botao finalizarPlantio
-                  
+                    botao finalizarPlantio                  
                     add numBandejas
                     add timestamp
                     add idUsuarioPlantio
@@ -48,40 +47,58 @@ Arrumar index.router
                     add gramasColhidas
                 depois de feita a colheita de todos os plantios, habilita botao finalizar lote
                     add numero de caixas
-                    
-    -caixas
-        estimativa de venda de caixas por tipo de lote (por sexta e por terça) (ou por dia da semana) 
 
-        caixas produzidas por lotes
-        caixas produzidas por sobras
-            marcar vendas das caixas por comprador
+- Sementes (admin)
+    - estoque 
+        _crud_ Sementes
+            selecionar semente da espec sementes
+        para cada semente, quais sao os lotes (ativos, finalizados, media de producao em gramas por plantio)
+        marcar finalizar estoque de semente
+            -calcular producao em gramas e custo final de plantio
+    - especificacoes
+        _crud_ especSementes
+        add estimativa producao por bandeja em especSementes
+        
+        
 
-    -lotes 
+Lotes (admin)
+    -producao
         crud lote(admin)
-            sujerir lotes pela estimativa de venda
-            campo calculado: estimativaDeCaixas (de acordo com especSementes)            
+            data
+            card notificacao(!)(x)
+                sugerir lotes do bloco pelo historico de venda no dia da semana
+            campo calculado: estimativaDeCaixasAseremProduzidas (de acordo com especSementes)            
             _para cada lote_
                 campo calculado: estimativaEmGramas (de acordo com especSementes)
                 botao gerar etiquetas
                 _crud_ plantio
-                    selecionar semente
-
-    - especificacoes (admin) abas:
-        - Sementes
-            _crud_ especSementes
-            add estimativa producao por bandeja em especSementes
-        - Embalagens
+                    selecionar semente do estoque
+                    valor do substrato(placeholder -especPlantio)
+    -caixas
+            estimativa de venda de caixas por tipo de lote (por sexta e por terça) (ou por dia da semana) 
+            add caixa
+                caixas produzidas por lotes
+                caixas produzidas por sobras
+            marcar caixas vendidas e adicionar data da venda
+            resumo das vendas 
+            tabela vendas por comprador
+        -especificacoes Embalagens
             _crud_ especEmbalagens
-        - Outras
-            _crud_ especOutras
+        -especificacoes de custo do plantio
+            _crud_ especPlantio
+            substrato
+
+- Usuarios (admin)
+        editar papeis (nao apto, colaborador, admin)
+
+    
+        
             
 
-    - sementes (admin)
-        _crud_ Sementes
-        lotes por semente
+    
 
 perguntas felipe:
-onde encaixa as vendas
+onde encaixa as vendas: caixas
 
     
     

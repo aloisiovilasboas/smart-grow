@@ -5,11 +5,13 @@ import router from "./router";
 
 import PrimeVue from "primevue/config";
 import "primeflex/primeflex.css";
-import "primevue/resources/themes/lara-dark-teal/theme.css"; //theme
+import "primevue/resources/themes/aura-light-lime/theme.css"; //theme
 import "primevue/resources/primevue.min.css"; //core css
 import "primeicons/primeicons.css"; //icons
 
 import "./style.css";
+
+import ToastService from "primevue/toastservice";
 
 import { inicializarFirebase } from "../src/services/firebase";
 
@@ -42,6 +44,7 @@ if (localStorage.getItem("state")) {
 }
 
 const app = createApp(App);
+app.use(ToastService);
 
 app.use(router);
 app.use(PrimeVue);

@@ -3,7 +3,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Cadastro from "../views/Cadastro.vue";
-import Admin from "../views/Admin.vue";
+import Usuarios from "@/views/Usuarios.vue";
+import Sementes from "@/views/Sementes.vue";
 import Painel from "../views/Painel.vue";
 import Perfil from "../views/Perfil.vue";
 
@@ -32,7 +33,7 @@ const router = createRouter({
     {
       path: "/painel",
       component: Painel,
-      meta: { requiresAuth: true },
+      meta: { requiresApto: true },
     },
     {
       path: "/login",
@@ -45,11 +46,29 @@ const router = createRouter({
       meta: { requiresDeslogado: true },
     },
     {
-      path: "/admin",
-      name: "Admin",
+      path: "/Sementes",
+      name: "Sementes",
+      component: Sementes,
+      meta: { requiresAdmin: true },
+    },
+    {
+      path: "/Usuarios",
+      name: "Usuarios",
+      component: Usuarios,
+      meta: { requiresAdmin: true },
+    } /* 
+    {
+      path: "/Sementes/:id",
+      name: "Semente",
       component: Admin,
       meta: { requiresAdmin: true },
     },
+    {
+      path: "/Usuarios/:id",
+      name: "Usuario",
+      component: Admin,
+      meta: { requiresAdmin: true },
+    }, */,
   ],
 });
 
@@ -120,6 +139,18 @@ router.beforeEach(async (to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (userStore.user.id) {
       next();
+    } else {
+      alert("Você não está logado");
+      next("/login");
+    }
+  } else if (to.matched.some((record) => record.meta.requiresApto)) {
+    if (userStore.user.id) {
+      if (userStore.user.apto) {
+        next();
+      } else {
+        alert("Você não está apto");
+        next("/");
+      }
     } else {
       alert("Você não está logado");
       next("/login");

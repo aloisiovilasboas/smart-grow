@@ -22,10 +22,9 @@ import { db } from "../services/firebase";
 
 export const useUserStore = defineStore("user", {
   state: () => {
-    const isLogged = ref(false);
-    /* const isAdmin = ref(false); */
-    const idCadastro = "";
-    /*  const authuser = ref(); */
+    const admin = ref(false);
+    const loggedin = ref(false);
+    const apto = ref(false);
     const user = ref({
       apto: false,
       admin: false,
@@ -34,6 +33,10 @@ export const useUserStore = defineStore("user", {
       email: "email",
       nome: "nan",
     });
+
+    const isAdmin = computed(() => user.value.admin);
+    const isapto = computed(() => user.value.apto);
+    const isLogged = computed(() => user.value.id != null);
 
     //    const website = computed(() => user.value.email.substring(user.value.email.lastIndexOf("@") +1 ));
 
@@ -52,13 +55,18 @@ export const useUserStore = defineStore("user", {
       user.value = u;
     };
 
-    const changeId = (newid) => {
+    /* const changeId = (newid) => {
       user.value.id = newid;
-    };
+    }; */
 
     return {
+      admin,
+      loggedin,
       user,
-      changeId,
+      /* changeId, */
+      isAdmin,
+      isLogged,
+      isapto,
       setUser,
       resetUser,
       /* authuser, */

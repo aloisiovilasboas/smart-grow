@@ -26,14 +26,16 @@
               </Button>
             </router-link>
             <!-- um router link para cada intem na lista de links chamada links utilizando v-for -->
-            <router-link v-for="link in links" :key="link.name" :to="link.path"
-              @click.native="InlineButtonClickHandler">
-              <h2>{{ link }}</h2>
-              <Button class="p-button-text button-sidebar">
-                <span class="p-button-label">{{ link.name }}</span>
-              </Button>
-            </router-link>
-
+            <div v-for="link in links">
+              <div v-if="link.show">
+                <router-link :key="link.name" :to="link.path" @click.native="InlineButtonClickHandler">
+                  <!-- <h2>{{ link }}</h2> -->
+                  <Button class="p-button-text button-sidebar">
+                    <span class="p-button-label">{{ link.name }}</span>
+                  </Button>
+                </router-link>
+              </div>
+            </div>
             <Button label="Sair" class="p-button-text button-sidebar" icon="pi pi-sign-out" @click="handleSignOut" />
 
           </div>
@@ -45,7 +47,7 @@
 
 <script setup>
 
-import { onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, onUpdated, ref } from "vue";
 
 import { RouterLink, RouterView } from 'vue-router'
 import router from "./router";
@@ -70,20 +72,31 @@ const visibleLeft = ref(false);
 const userStore = useUserStore();
 const usuariosStore = useUsuariosStore();
 const loadingstore = useLoadingStore();
-const links = [
+const links = ref([]);
 
-  { name: "Login", path: "/Login", show: true /* userStore. */ },
-  { name: "Cadastro", path: "/Cadastro", show: true /* !isLoggedIn.value  */ },
-  { name: "Admin", path: "/Admin", show: userStore.isAdmin },
-  { name: "Perfil", path: "/Perfil", show: true /* isLoggedIn.value */ },
+onUpdated(() => {
 
-];
+  links.value = [
+
+    { name: "Login", path: "/Login", show: !userStore.isLogged },
+    { name: "Cadastro", path: "/Cadastro", show: !userStore.isLogged },
+    { name: "Painel", path: "/Painel", show: userStore.isapto },
+    { name: "Perfil", path: "/Perfil", show: userStore.isLogged },
+    { name: "Sementes", path: "/Sementes", show: userStore.isAdmin },
+    { name: "Usuários", path: "/Usuarios", show: userStore.isAdmin }
+
+  ]
+})
 
 const InlineButtonClickHandler = () => {
   visibleLeft.value = !visibleLeft.value
 }
 
 let auth;
+
+
+
+
 
 /* onMounted( () => {
   auth = getAuth();

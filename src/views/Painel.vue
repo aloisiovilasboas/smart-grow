@@ -1,35 +1,15 @@
-<script setup>
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
-//import TheWelcome from '../components/TheWelcome.vue'
-
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import ColumnGroup from 'primevue/columngroup';   // optional
-import Row from 'primevue/row';                   // optional
-
-
-
-import { useSementesStore } from "../stores/sementes";
-import { onMounted, onBeforeMount, ref } from 'vue';
-
-
-const sementesStore = useSementesStore();
-
-const sementes = ref({});
-
-onBeforeMount(() => {
-
-    sementesStore.fetchSementes();
-    sementes.value = sementesStore.sementes;
-
-});
-
-
-</script>
-
 <template>
+
     <main>
+
+        <div>
+            <DataTable :value="sementesStore.sementes" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]">
+                <Column field="microverde" header="Microverde"></Column>
+                <Column field="fornecedor" header="Fornecedor"></Column>
+                <Column field="valorBruto" header="Preço"></Column>
+                <Column field="percentualICMS" header="% ICMS"></Column>
+            </DataTable>
+        </div>
         <!--  <div>
             <h1><img src="../assets/cultiveselogo.webp" height="250"></h1>
         </div> -->
@@ -77,6 +57,37 @@ onBeforeMount(() => {
         </div>
     </main>
 </template>
+
+<script setup>
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
+//import TheWelcome from '../components/TheWelcome.vue'
+
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import ColumnGroup from 'primevue/columngroup';   // optional
+import Row from 'primevue/row';                   // optional
+
+
+
+import { useSementesStore } from "../stores/sementes";
+import { onMounted, onBeforeMount, ref } from 'vue';
+
+
+const sementesStore = useSementesStore();
+
+const sementes = ref({});
+
+onBeforeMount(() => {
+
+    sementesStore.fetchSementes();
+    sementes.value = sementesStore.sementes;
+
+});
+
+
+</script>
+
 <style>
 @media (min-width: 1024px) {
     .admin {

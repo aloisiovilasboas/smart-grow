@@ -7,20 +7,50 @@
 
  -->
     <div>
-        <Card class="Login">
+        <!--  <Card class="Login">
             <template #header>
                 <img src="../assets/cultiveselogo.webp" />
 
             </template>
-            <!--  <template #title>
-                Entre
-            </template> -->
-            <!-- <template #subtitle>
-                Conclua o cadastro para participar do bolão
-            </template> -->
 
 
+
+</Card> -->
+        <Card class="inscricao">
+            <template #header>
+                <img src="../assets/cultiveselogo.webp" width="100%" />
+                <!--     <img src="../assets/imgs/rascunho.png"  /> -->
+            </template>
+            <template #title>
+
+            </template>
+            <!-- <template #subtiirParaRankingtle>
+                Bem vindo
+            </template> -->
+            <template #content>
+
+                <div class="col-12 card_home">
+
+                    <div class="botao_home" v-for="link in links">
+                        <div v-if="link.show">
+                            <Button class="col-8 p-button-primary" @click="irPara(link.path)">
+                                <span class="p-button-icon p-button-icon-left">🌱</span>
+                                <span class="p-button-label">{{ link.name }}</span>
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+            </template>
+            <template #footer>
+                <!-- <Button icon="pi pi-check" label="Save" />
+                <Button icon="pi pi-times" label="Cancel" class="p-button-secondary" style="margin-left: .5em" />
+        -->
+            </template>
         </Card>
+
+
+
     </div>
 
 
@@ -37,11 +67,28 @@ import InlineMessage from 'primevue/inlinemessage';
 import { ref } from "vue";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "vue-router";
+import { useUserStore } from "../stores/user";
 
+const userStore = useUserStore();
+
+const links = ref([
+
+    { name: "Login", path: "/Login", show: !userStore.isLogged },
+    { name: "Cadastro", path: "/Cadastro", show: !userStore.isLogged },
+    { name: "Painel", path: "/Painel", show: userStore.isapto },
+    { name: "Perfil", path: "/Perfil", show: userStore.isLogged },
+    { name: "Sementes", path: "/Sementes", show: userStore.isAdmin },
+    { name: "Usuários", path: "/Usuarios", show: userStore.isAdmin }
+
+]);
 const email = ref("");
 const password = ref("");
 const errMsg = ref() // ERROR MESSSAGE
 const router = useRouter()
+
+const irPara = (path) => {
+    router.push(path);
+}
 
 const register = () => {
     signInWithEmailAndPassword(getAuth(), email.value, password.value)

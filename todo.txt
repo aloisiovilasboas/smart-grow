@@ -82,14 +82,15 @@ Lotes (admin)
             marcar caixas vendidas e adicionar data da venda
             resumo das vendas 
             tabela vendas por comprador
-        -especificacoes Embalagens
+    -especificacoes Embalagens
             _crud_ especEmbalagens
-        -especificacoes de custo do plantio
+    -especificacoes de custo do plantio
             _crud_ especPlantio
             substrato
 
 - Usuarios (admin)
         editar papeis (nao apto, colaborador, admin)
+        ok
 
     
         

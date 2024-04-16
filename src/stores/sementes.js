@@ -27,24 +27,11 @@ export const useSementesStore = defineStore("sementes", {
     return {
       sementes,
       especSementes,
+      loadingSementes,
       /* setSementes, */
     };
   },
   actions: {
-    async fetchSementes2() {
-      loadingSementes.value = true;
-      funcoesCRUD
-        .fetch("sementes")
-        .then((elementos) => {
-          this.sementes = elementos;
-          loadingSementes.value = false;
-        })
-
-        .catch((err) => {
-          loadingSementes.value = false;
-          console.log(err.message);
-        });
-    },
     async fetchSementes() {
       const colRef = collection(db, "sementes");
       getDocs(colRef)
@@ -74,38 +61,30 @@ export const useSementesStore = defineStore("sementes", {
           console.log(err.message);
         });
     },
-    /* async fetchEspecSementes2() {
-      const colRef = collection(db, "especSementes");
-      getDocs(colRef)
-        .then((snapshot) => {
-          const helper = [];
-          this.especSementes = [];
-          snapshot.docs.forEach((doc) => {
-            let especSemente = { ...doc.data(), id: doc.id };
 
-            helper.push(especSemente);
-            const columns = [];
-            helper.forEach((espec) => {
-              for (const property in espec) {
-                //  console.log(`${property}: ${espec[property]}`);
-                if (property != "id") {
-                  columns.push({ header: property, field: espec[property] });
-                }
-              }
-              this.especSementes.push({ id: espec.id, columns: columns });
-            });
-            console.log(this.especSementes);
-          });
-        })
-        .catch((err) => {
-          console.log(err.message);
+    async setaSemente(s) {
+      try {
+        const docref = doc(db, "sementes", s.id);
+        let index = this.sementes.findIndex((semente) => s.id == semente.id);
+
+        await updateDoc(docref, s).then(() => {
+          this.sementes[index] = s;
+          /* this.sementes.sort((a, b) =>
+            a.microverde > b.microverde ? 1 : -1
+          ); */
         });
-    }, */
+      } catch (e) {
+        alert("Erro alterando semente: ", e);
+        console.error("Erro alterando semente: ", e);
+      }
+    },
+
     async setaEspecSemente(e) {
       try {
         const docref = doc(db, "especSementes", e.id);
+        let index = this.especSementes.findIndex((es) => e.id == es.id);
+
         await updateDoc(docref, e).then(() => {
-          let index = this.especSementes.findIndex((es) => e.id == es.id);
           this.especSementes[index] = e;
           /* this.especSementes.sort((a, b) =>
             a.microverde > b.microverde ? 1 : -1
@@ -116,32 +95,48 @@ export const useSementesStore = defineStore("sementes", {
         console.error("Erro alterando especificacao de semente: ", e);
       }
     },
+    async deletaSemente(semente) {
+      try {
+        const docRef = doc(db, "sementes", semente.id);
+        let index = this.sementes.findIndex((s) => s.id == semente.id);
+        await deleteDoc(docRef).then(() => {
+          this.sementes.splice(index, 1);
+        });
+      } catch (e) {
+        alert("Erro deletando semente: ", e);
+        console.error("Erro deletando semente: ", e);
+      }
+    },
     async deletaEspecSemente(especSemente) {
       try {
         const docRef = doc(db, "especSementes", especSemente.id);
-        await deleteDoc(docRef) /* .then(() => {
-          let index = this.especSementes.findIndex(
-            (es) => es.id == especSemente.id
-          );
+        let index = this.especSementes.findIndex(
+          (es) => es.id == especSemente.id
+        );
+        await deleteDoc(docRef).then(() => {
           this.especSementes.splice(index, 1);
-        }) */;
+        });
       } catch (e) {
         alert("Erro deletando especificacao de semente: ", e);
         console.error("Erro deletando especificacao de semente: ", e);
       }
     },
-
-    async salvaNovaEspecSemente(es) {
+    async addSemente(s) {
       try {
-        const docRef = await addDoc(
-          collection(db, "especSementes"),
-          es
-        ); /* .then(
-          () => {
-            this.especSementes.push(es);
-            
-          } 
-        )*/
+        const docRef = await addDoc(collection(db, "sementes"), s);
+        s.id = docRef.id;
+        this.sementes.push(s);
+      } catch (e) {
+        alert("Erro adicionando semente: ", e);
+        console.error("Erro adicionando semente: ", e);
+      }
+    },
+
+    async addEspecSemente(es) {
+      try {
+        const docRef = await addDoc(collection(db, "especSementes"), es);
+        es.id = docRef.id;
+        this.especSementes.push(es);
       } catch (e) {
         alert("Erro adicionando especificacao de semente: ", e);
         console.error("Erro adicionando especificacao de semente: ", e);

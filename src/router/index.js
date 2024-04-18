@@ -5,6 +5,7 @@ import Login from "../views/Login.vue";
 import Cadastro from "../views/Cadastro.vue";
 import Usuarios from "@/views/Usuarios.vue";
 import Sementes from "@/views/Sementes.vue";
+import Lotes from "@/views/Lotes.vue";
 import Painel from "../views/Painel.vue";
 import Perfil from "../views/Perfil.vue";
 
@@ -49,6 +50,13 @@ const router = createRouter({
       path: "/Sementes",
       name: "Sementes",
       component: Sementes,
+      meta: { requiresAdmin: true },
+    },
+
+    {
+      path: "/Lotes",
+      name: "Lotes",
+      component: Lotes,
       meta: { requiresAdmin: true },
     },
     {

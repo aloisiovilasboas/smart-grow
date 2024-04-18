@@ -78,6 +78,7 @@ const links = ref([
     { name: "Painel", path: "/Painel", show: userStore.isapto },
     { name: "Perfil", path: "/Perfil", show: userStore.isLogged },
     { name: "Sementes", path: "/Sementes", show: userStore.isAdmin },
+    { name: "Lotes", path: "/Lotes", show: userStore.isAdmin },
     { name: "Usuários", path: "/Usuarios", show: userStore.isAdmin }
 
 ]);

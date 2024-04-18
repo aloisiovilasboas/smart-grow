@@ -63,17 +63,19 @@ Arrumar index.router
 
 Lotes (admin)
     -producao
-        crud lote(admin)
-            data
-            card notificacao(!)(x)
+        card notificacao(!)(x)
                 sugerir lotes do bloco pelo historico de venda no dia da semana
-            campo calculado: estimativaDeCaixasAseremProduzidas (de acordo com especSementes)            
+        crud lote(admin)
+            nome(data) do bloco
+            data da colheita
+            seleciona semente
+            seleciona especSemente
+            valor do substrato(placeholder -especPlantio)     
             _para cada lote_
                 campo calculado: estimativaEmGramas (de acordo com especSementes)
+                campos calculados: datas de manejo
                 botao gerar etiquetas
-                _crud_ plantio
-                    selecionar semente do estoque
-                    valor do substrato(placeholder -especPlantio)
+                    
     -caixas
             estimativa de venda de caixas por tipo de lote (por sexta e por terça) (ou por dia da semana) 
             add caixa

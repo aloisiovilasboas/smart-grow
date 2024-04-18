@@ -2,7 +2,7 @@
   <div class="flex flex-column ">
     <TabView>
 
-      <TabPanel header="Sementes">
+      <TabPanel header="Produção">
         <div>
           <!-- <DataTable :value="sementesStore.sementes" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]">
             <Column field="microverde" header="Microverde"></Column>
@@ -11,7 +11,7 @@
             <Column field="percentualICMS" header="% ICMS"></Column>
           </DataTable> -->
 
-          <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.sementes" dataKey="id">
+          <!-- <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.sementes" dataKey="id">
             <Column v-for="col of colunasSementes" :key="col.field" :field="col.field" sortable :header="col.header"
               style="min-width: 5rem; text-align: center;">
             </Column>
@@ -21,11 +21,11 @@
                   @click="editSemente(slotProps.data)" />
                 <Button icon="pi pi-trash" rounded severity="secondary" @click="confirmDeleteSemente(slotProps.data)" />
               </template>
-            </Column>
-          </DataTable>
+</Column>
+</DataTable> -->
           <Toolbar class="mb-4">
             <template #start>
-              <Button label="Nova" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewSemente" />
+              <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewBloco" />
             </template>
           </Toolbar>
 
@@ -33,25 +33,15 @@
       </TabPanel>
 
 
-      <TabPanel header="Especificações" :disabled="false">
+      <TabPanel header="Caixas" :disabled="false">
 
-        <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.especSementes" dataKey="id">
+        <!-- <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.especSementes" dataKey="id">
           <Column v-for="col of colunasEspecSementes" :key="col.field" :field="col.field" sortable :header="col.header"
             style="min-width: 5rem; text-align: center;">
-            <!--  <template #body="{ data, field }">
-              {{ data[field] }}
-            </template> -->
-            <!-- <template #editor="{ data, field }">
-              <template v-if="field !== 'microverde'">
-                <InputNumber v-model="data[field]" autofocus />
-              </template>
-              <template v-else="field !== 'microverde'">
-                <InputText v-model="data[field]" autofocus />
-              </template>
-            </template> -->
+            
           </Column>
 
-          <!--  <Column :rowEditor="true" style="width: 10%; min-width: 5rem" bodyStyle="text-align:center"></Column> -->
+          
           <Column :exportable="false" style="min-width:5rem">
             <template #body="slotProps">
               <Button icon="pi pi-pencil" outlined severity="secondary" rounded class="mr-2"
@@ -60,9 +50,10 @@
             </template>
           </Column>
         </DataTable>
+      -->
         <Toolbar class="mb-4">
           <template #start>
-            <Button label="Nova" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewEspec" />
+            <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewEspec" />
           </template>
         </Toolbar>
       </TabPanel>
@@ -70,35 +61,69 @@
   </div>
 
   <div>
-    <Dialog v-model:visible="sementeDialog" :style="{ width: '450px' }" header="Nova semente" :modal="true"
-      class="p-fluid">
+
+    <Dialog v-model:visible="blocoDialog" :style="{ width: '450px' }" header="Novo Bloco" :modal="true" class="p-fluid">
+
       <div class="field">
-        <label for="microverde">Microverde</label>
-        <InputText id="microverde" v-model.trim="sementedodialog.microverde" required="true" autofocus
-          :invalid="submitted && !sementedodialog.microverde" />
-        <small class="p-error" v-if="submitted && !sementedodialog.microverde">Esse campo não pode ficar em
+        <label for="icondisplay" class="font-bold block mb-2"> Selecione a data do bloco </label>
+        <Calendar v-model="databloco" showIcon iconDisplay="input" inputId="icondisplay" />
+      </div>
+
+      <template #footer>
+        <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogBloco" />
+        <Button label="Salvar" icon="pi pi-check" text @click="salvarNovaBloco" />
+      </template>
+
+
+    </Dialog>
+
+  </div>
+
+  <div>
+
+    <Dialog v-model:visible="loteDialog" :style="{ width: '450px' }" header="Nova lote" :modal="true" class="p-fluid">
+
+      <div class="field">
+        <label for="bloco">Bloco</label>
+        <InputText id="bloco" v-model.trim="lotedodialog.bloco" required="true" autofocus
+          :invalid="submitted && !lotedodialog.bloco" />
+        <small class="p-error" v-if="submitted && !lotedodialog.bloco">Esse campo não pode ficar em
           branco</small>
       </div>
       <div class="field">
-        <label for="fornecedor">Fornecedor</label>
-        <InputText id="fornecedor" v-model.trim="sementedodialog.fornecedor" required="true" autofocus
-          :invalid="submitted && !sementedodialog.fornecedor" />
-        <small class="p-error" v-if="submitted && !sementedodialog.fornecedor">Esse campo não pode ficar em
+        <label for="icondisplay" class="font-bold block mb-2"> Bloco </label>
+        <Calendar v-model="databloco" showIcon iconDisplay="input" inputId="icondisplay" />
+      </div>
+      <div class="field">
+        <label for="microverde">Semente</label>
+        <Dropdown v-model="selectedSemente" :options="sementesStore.sementes" optionLabel="microverde"
+          placeholder="Selecione a semente" checkmark :highlightOnSelect="false" />
+        <small class="p-error" v-if="submitted && !lotedodialog.microverde">Esse campo não pode ficar em
           branco</small>
       </div>
+
+      <div class="field">
+        <label for="microverde">Especificação</label>
+        <Dropdown v-model="selectedEspec" :options="sementesStore.especSementes" optionLabel="microverde"
+          placeholder="Selecione a especificação" checkmark :highlightOnSelect="false" />
+        <small class="p-error" v-if="submitted && !lotedodialog.espec">Esse campo não pode ficar em
+          branco</small>
+      </div>
+
+
       <div class="field">
         <label for="valorBruto">Preço</label>
-        <InputNumber id="valorBruto" v-model="sementedodialog.valorBruto" required="true" autofocus
-          :invalid="submitted && !sementedodialog.valorBruto" inputId="minmaxfraction" :minFractionDigits="2"
+        <InputNumber id="valorBruto" v-model="lotedodialog.valorBruto" required="true" autofocus
+          :invalid="submitted && !lotedodialog.valorBruto" inputId="minmaxfraction" :minFractionDigits="2"
           :maxFractionDigits="2" />
-        <small class="p-error" v-if="submitted && !sementedodialog.valorBruto">Esse campo não pode ficar em
+        <small class="p-error" v-if="submitted && !lotedodialog.valorBruto">Esse campo não pode ficar em
           branco</small>
       </div>
       <div class="field">
         <label for="percentualICMS">Percentual ICMS</label>
-        <InputNumber id="percentualICMS" v-model="sementedodialog.percentualICMS" required="true" autofocus
-          :invalid="submitted && !sementedodialog.percentualICMS" suffix="%" />
-        <small class="p-error" v-if="submitted && !sementedodialog.percentualICMS">Esse campo não pode ficar em
+        <InputNumber id="percentualICMS" v-model="lotedodialog.percentualICMS" required="true" autofocus
+          :invalid="submitted && !lotedodialog.percentualICMS" suffix="%" />
+        <small class="p-error" v-if="submitted && !lotedodialog.percentualICMS">Esse campo não pode ficar em
           branco</small>
       </div>
       <template #footer>
@@ -174,7 +199,7 @@
     <Dialog v-model:visible="deleteSementeDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
       <div class="confirmation-content">
         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-        <span v-if="sementedodialog">Tem certeza que deseja deletar <b>{{ sementedodialog.microverde }}</b>?</span>
+        <span v-if="lotedodialog">Tem certeza que deseja deletar <b>{{ lotedodialog.microverde }}</b>?</span>
       </div>
       <template #footer>
         <Button label="No" icon="pi pi-times" text @click="deleteSementeDialog = false" />
@@ -213,6 +238,8 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Toolbar from 'primevue/toolbar';
+import Dropdown from 'primevue/dropdown';
+import Calendar from 'primevue/calendar';
 
 
 
@@ -222,15 +249,35 @@ import { useSementesStore } from '../stores/sementes';
 
 
 
-import { onBeforeMount, onUpdated, ref } from 'vue';
+import { onBeforeMount, onUpdated, ref, watch } from 'vue';
+
+
+
+
+const selectedSemente = ref();
+const selectedEspec = ref();
+const databloco = ref();
+
+watch(selectedSemente, (newX) => {
+
+  //encontrar a espec que o inicio do nome do microverde é igual ao microverde selecionado
+
+  sementesStore.especSementes.findIndex((espec) => {
+    if (espec.microverde.startsWith(selectedSemente.value.microverde.split())) {
+      selectedEspec.value = { ...espec };
+    }
+  })
+})
 
 const ehEdit = ref(false);
+const ehEditBloco = ref(false);
+const ehEditLote = ref(false);
 
-const especdodialog = ref({});
-const sementedodialog = ref({});
+const blocododialog = ref({});
+const lotedodialog = ref({});
 
-const especDialog = ref(false);
-const sementeDialog = ref(false);
+const blocoDialog = ref(false);
+const loteDialog = ref(false);
 
 const submitted = ref(false);
 
@@ -239,8 +286,8 @@ const deleteSementeDialog = ref(false);
 
 const editSemente = (semente) => {
   ehEdit.value = true;
-  sementedodialog.value = { ...semente };
-  sementeDialog.value = true;
+  lotedodialog.value = { ...semente };
+  loteDialog.value = true;
 };
 
 const editEspec = (espec) => {
@@ -253,9 +300,16 @@ const small = ref('small');
 
 const openNewSemente = () => {
   ehEdit.value = false;
-  sementedodialog.value = {};
+  lotedodialog.value = {};
   submitted.value = false;
-  sementeDialog.value = true;
+  loteDialog.value = true;
+};
+
+const openNewBloco = () => {
+  ehEditBloco.value = false;
+  blocododialog.value = {};
+  submitted.value = false;
+  blocoDialog.value = true;
 };
 
 const openNewEspec = () => {
@@ -266,36 +320,41 @@ const openNewEspec = () => {
 };
 
 const sementevalido = () => {
-  return sementedodialog.value.microverde !== '' &&
-    sementedodialog.value.microverde !== null &&
-    sementedodialog.value.fornecedor !== '' &&
-    sementedodialog.value.fornecedor !== null &&
-    sementedodialog.value.valorBruto !== '' &&
-    sementedodialog.value.valorBruto !== null &&
-    sementedodialog.value.percentualICMS !== '' &&
-    sementedodialog.value.percentualICMS !== null;
+  return lotedodialog.value.microverde !== '' &&
+    lotedodialog.value.microverde !== null &&
+    lotedodialog.value.fornecedor !== '' &&
+    lotedodialog.value.fornecedor !== null &&
+    lotedodialog.value.valorBruto !== '' &&
+    lotedodialog.value.valorBruto !== null &&
+    lotedodialog.value.percentualICMS !== '' &&
+    lotedodialog.value.percentualICMS !== null;
 };
 
-const especvalido = () => {
-  return especdodialog.value.microverde !== '' &&
-    especdodialog.value.microverde !== null &&
-    especdodialog.value.diasEmPilha !== '' &&
-    especdodialog.value.diasEmPilha !== null &&
-    especdodialog.value.blackout !== '' &&
-    especdodialog.value.blackout !== null &&
-    especdodialog.value.diasAteAColheita !== '' &&
-    especdodialog.value.diasAteAColheita !== null &&
-    especdodialog.value.gramasBandejaPlantio !== ''
-    && especdodialog.value.gramasBandejaPlantio !== null;
+const blocovalido = () => {
+  return lotedodialog.value.bloco !== '' &&
+    lotedodialog.value.bloco !== null;
+};
+
+
+
+const salvarNovaBloco = () => {
+  submitted.value = true;
+  if (blocovalido()) {
+    ehEditBloco.value ? sementesStore.setaBloco(blocododialog.value) : sementesStore.addBloco(blocododialog.value);
+    blocoDialog.value = false;
+    blocododialog.value = {};
+    submitted.value = false;
+  }
+  // salva novabloco no banco e fecha o dialog
 };
 
 
 const salvarNovaSemente = () => {
   submitted.value = true;
   if (sementevalido()) {
-    ehEdit.value ? sementesStore.setaSemente(sementedodialog.value) : sementesStore.addSemente(sementedodialog.value);
-    sementeDialog.value = false;
-    sementedodialog.value = {};
+    ehEdit.value ? sementesStore.setaSemente(lotedodialog.value) : sementesStore.addSemente(lotedodialog.value);
+    loteDialog.value = false;
+    lotedodialog.value = {};
     submitted.value = false;
   }
   // salva novasemente no banco e fecha o dialog
@@ -315,8 +374,8 @@ const salvarNovaEspec = () => {
 };
 
 const hideDialogSemente = () => {
-  sementeDialog.value = false;
-  sementedodialog.value = {};
+  loteDialog.value = false;
+  lotedodialog.value = {};
 };
 
 const hideDialogEspec = () => {
@@ -325,7 +384,7 @@ const hideDialogEspec = () => {
 };
 
 const confirmDeleteSemente = (semente) => {
-  sementedodialog.value = semente;
+  lotedodialog.value = semente;
   deleteSementeDialog.value = true;
 };
 
@@ -337,8 +396,8 @@ const confirmDeleteEspec = (es) => {
 const deleteSemente = () => {
 
   deleteSementeDialog.value = false;
-  sementesStore.deletaSemente(sementedodialog.value)
-  sementedodialog.value = {};
+  sementesStore.deletaSemente(lotedodialog.value)
+  lotedodialog.value = {};
 };
 
 const deleteEspec = () => {

@@ -2,18 +2,19 @@
   <div class="flex flex-column ">
     <TabView>
 
-      <TabPanel header="Sementes">
+      <TabPanel header="Estoque Sementes">
         <div>
-          <!-- <DataTable :value="sementesStore.sementes" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]">
-            <Column field="microverde" header="Microverde"></Column>
-            <Column field="fornecedor" header="Fornecedor"></Column>
-            <Column field="valorBruto" header="Preço"></Column>
-            <Column field="percentualICMS" header="% ICMS"></Column>
-          </DataTable> -->
+
 
           <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.sementes" dataKey="id">
             <Column v-for="col of colunasSementes" :key="col.field" :field="col.field" sortable :header="col.header"
               style="min-width: 5rem; text-align: center;">
+              <template #body="{ data, field }" v-if="col.field == 'especSemente'">
+                {{ achaEspec(data[field]) }}
+              </template>
+              <template #body="{ data, field }" v-else>
+                {{ data[field] }}
+              </template>
             </Column>
             <Column :exportable="false" style="min-width:5rem">
               <template #body="slotProps">
@@ -38,17 +39,7 @@
         <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.especSementes" dataKey="id">
           <Column v-for="col of colunasEspecSementes" :key="col.field" :field="col.field" sortable :header="col.header"
             style="min-width: 5rem; text-align: center;">
-            <!--  <template #body="{ data, field }">
-              {{ data[field] }}
-            </template> -->
-            <!-- <template #editor="{ data, field }">
-              <template v-if="field !== 'microverde'">
-                <InputNumber v-model="data[field]" autofocus />
-              </template>
-              <template v-else="field !== 'microverde'">
-                <InputText v-model="data[field]" autofocus />
-              </template>
-            </template> -->
+
           </Column>
 
           <!--  <Column :rowEditor="true" style="width: 10%; min-width: 5rem" bodyStyle="text-align:center"></Column> -->
@@ -78,6 +69,16 @@
           :invalid="submitted && !sementedodialog.microverde" />
         <small class="p-error" v-if="submitted && !sementedodialog.microverde">Esse campo não pode ficar em
           branco</small>
+      </div>
+      <div class="field">
+        <label for="especSemente"> Especificação </label>
+        <Dropdown id="especSemente" v-model="sementedodialog.especSemente" :options="sementesStore.especSementes"
+          optionLabel="microverde" optionValue="id" placeholder="Selecione uma especificação"
+          :invalid="submitted && !sementedodialog.especSemente" />
+
+        <small class="p-error" v-if="submitted && !sementedodialog.especSemente">Esse campo não pode ficar em
+          branco</small>
+
       </div>
       <div class="field">
         <label for="fornecedor">Fornecedor</label>
@@ -177,8 +178,8 @@
         <span v-if="sementedodialog">Tem certeza que deseja deletar <b>{{ sementedodialog.microverde }}</b>?</span>
       </div>
       <template #footer>
-        <Button label="No" icon="pi pi-times" text @click="deleteSementeDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="deleteSemente" />
+        <Button label="Não" icon="pi pi-times" text @click="deleteSementeDialog = false" />
+        <Button label="Sim" icon="pi pi-check" text @click="deleteSemente" />
       </template>
     </Dialog>
 
@@ -189,8 +190,8 @@
         <span v-if="especdodialog">Tem certeza que deseja deletar <b>{{ especdodialog.microverde }}</b>?</span>
       </div>
       <template #footer>
-        <Button label="No" icon="pi pi-times" text @click="deleteEspecDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="deleteEspec" />
+        <Button label="Não" icon="pi pi-times" text @click="deleteEspecDialog = false" />
+        <Button label="Sim" icon="pi pi-check" text @click="deleteEspec" />
       </template>
     </Dialog>
 
@@ -213,6 +214,7 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Toolbar from 'primevue/toolbar';
+import Dropdown from 'primevue/dropdown';
 
 
 
@@ -222,12 +224,15 @@ import { useSementesStore } from '../stores/sementes';
 
 
 
-import { onBeforeMount, onUpdated, ref } from 'vue';
+import { onBeforeMount, onUpdated, ref, watch } from 'vue';
+
+
 
 const ehEdit = ref(false);
+const selectedEspec = ref();
 
 const especdodialog = ref({});
-const sementedodialog = ref({});
+const sementedodialog = ref({ microverde: '' });
 
 const especDialog = ref(false);
 const sementeDialog = ref(false);
@@ -236,6 +241,11 @@ const submitted = ref(false);
 
 const deleteEspecDialog = ref(false);
 const deleteSementeDialog = ref(false);
+
+
+
+
+
 
 const editSemente = (semente) => {
   ehEdit.value = true;
@@ -356,7 +366,8 @@ const colunasSementes = ref([
   { field: 'microverde', header: 'Microverde' },
   { field: 'fornecedor', header: 'Fornecedor' },
   { field: 'valorBruto', header: 'Preço' },
-  { field: 'percentualICMS', header: '% ICMS' }
+  { field: 'percentualICMS', header: '% ICMS' },
+  { field: 'especSemente', header: 'Especificação' }
 ]);
 
 const colunasEspecSementes = ref([
@@ -373,6 +384,11 @@ const colunasEspecSementes = ref([
   let { newData } = event;
   sementesStore.setaEspecSemente(newData);
 } */
+
+const achaEspec = (id) => {
+  let espec = sementesStore.especSementes.find((espec) => espec.id == id);
+  return espec ? espec.microverde : '';
+};
 
 onBeforeMount(() => {
   sementesStore.fetchSementes();

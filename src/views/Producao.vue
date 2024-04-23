@@ -27,8 +27,8 @@
         <template #content>
           <div class="field">
             <label for="microverde">Semente</label>
-            <Dropdown v-model="plantio.semente" :options="sementesStore.sementes" option-value="id"
-              optionLabel="microverde" placeholder="Semente" checkmark :highlightOnSelect="false" />
+            <Dropdown v-model="plantio.semente" :options="sementesStore.sementes" optionLabel="microverde"
+              placeholder="Semente" checkmark :highlightOnSelect="false" />
             <small class="p-error" v-if="submitted && !plantio.semente">Esse campo não pode ficar em
               branco</small>
           </div>
@@ -152,6 +152,30 @@ const salvarNovoLote = () => {
   submitted.value = true;
 
   if (lotedodialog.value.nome) {
+    plantiosdoDialog.value.forEach(plantio => {
+      //encontra a espec semente daquela semente
+      let especPlantio = sementesStore.especSementes.find((espec) => espec.id == plantio.semente.especSemente);
+      //calcula datas de plantio, blackout e estufa
+      //data do plantio: data da colheita menos a quantidade de dias que está na espec semente
+      plantio.dataSemeadura = new Date(plantio.dataColheita - especPlantio.diasAteAColheita * 24 * 60 * 60 * 1000);
+      plantio.dataIdaBlackout = new Date(plantio.dataColheita - (especPlantio.diasAteAColheita - especPlantio.diasEmPilha) * 24 * 60 * 60 * 1000);
+      plantio.dataIdaEstufa = new Date(plantio.dataColheita - (especPlantio.diasAteAColheita - especPlantio.diasEmPilha - especPlantio.blackout) * 24 * 60 * 60 * 1000);
+      plantio.estado = 'Pré-plantio';
+      delete plantio.semente.valorBruto
+      delete plantio.semente.percentualICMS
+      delete plantio.semente.fornecedor
+      // log especSemente
+      /* console.log('especSemente', especPlantio.diasEmPilha);
+      console.log('semeadura', plantio.dataSemeadura);
+      console.log('blackout', plantio.dataIdaBlackout);
+      console.log('estufa', plantio.dataIdaEstufa);
+      console.log('colheita', plantio.dataColheita); */
+
+      /*  plantio.dataPlantio = new Date(plantio.dataColheita); */
+
+
+      /* console.log(especPlantio); */
+    });
     const lote = { ...lotedodialog.value, plantios: plantiosdoDialog.value };
     // console.log(lote);
     useLotesStore().addLote(lote);

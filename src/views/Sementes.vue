@@ -16,6 +16,14 @@
                 {{ data[field] }}
               </template>
             </Column>
+            <!-- coluna com o valor final calculado pelo percentual de ICMS -->
+
+            <Column field="valorFinal" header="Valor Final" style="min-width: 5rem; text-align: center;">
+              <template #body="{ data }">
+                {{ (data.valorBruto * (1 + data.percentualICMS / 100)).toFixed(2) }}
+              </template>
+
+            </Column>
             <Column :exportable="false" style="min-width:5rem">
               <template #body="slotProps">
                 <Button icon="pi pi-pencil" outlined severity="secondary" rounded class="mr-2"
@@ -36,9 +44,10 @@
 
       <TabPanel header="Especificações" :disabled="false">
 
-        <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.especSementes" dataKey="id">
-          <Column v-for="col of colunasEspecSementes" :key="col.field" :field="col.field" sortable :header="col.header"
-            style="min-width: 5rem; text-align: center;">
+        <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.especSementes"
+          dataKey="id">
+          <Column v-for=" col  of  colunasEspecSementes " :key="col.field" :field="col.field" sortable
+            :header="col.header" style="min-width: 5rem; text-align: center;">
 
           </Column>
 
@@ -120,7 +129,8 @@
         <label for="microverde">Microverde</label>
         <InputText id="microverde" v-model.trim="especdodialog.microverde" required="true" autofocus
           :invalid="submitted && !especdodialog.microverde" />
-        <small class="p-error" v-if="submitted && !especdodialog.microverde">Esse campo não pode ficar em branco</small>
+        <small class="p-error" v-if="submitted && !especdodialog.microverde">Esse campo não pode ficar em
+          branco</small>
       </div>
 
       <div class="field">

@@ -66,14 +66,25 @@ Lotes (admin)
         card notificacao(!)(x)
                 sugerir lotes do bloco pelo historico de venda no dia da semana
         crud lote(admin)
-            nome(data) do bloco
-            data da colheita
-            seleciona semente
-            seleciona especSemente
-            valor do substrato(placeholder -especPlantio)     
-            _para cada lote_
-                campo calculado: estimativaEmGramas (de acordo com especSementes)
+            nome do bloco
+            crud plantio 
+                numero de bandejas
+                semente
+                data da colheita
+                valor do substrato(placeholder -especPlantio)
+
+        
+        Show lotes  
+            Nome lote como header do cartao
+            tabela dentro de um card com os plantios 
                 campos calculados: datas de manejo
+                campo calculado: estimativaEmGramas (de acordo com especSementes)
+                data da colheita
+            
+            seleciona especSemente
+             
+            _para cada lote_
+                
                 botao gerar etiquetas
                     
     -caixas
@@ -102,6 +113,21 @@ Lotes (admin)
 
 perguntas felipe:
 onde encaixa as vendas: caixas
+
+AMARANTO	40
+BETERRABA	70
+CEBOLINHA	40
+CENOURA	120
+COENTRO	95
+COUVE	130
+MANJERICÃO	120
+MOSTARDA	160
+RABANETE	230
+REPOLHO	110
+RUCULA	90
+ERVILHA ???
+GIRASSOL ???
+GRAMA DE TRIGO?
 
     
     

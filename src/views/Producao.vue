@@ -8,10 +8,51 @@
           <Button label="Novo Lote" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewLote" />
         </div>
         <div>
-          <DataTable :value="lotesStore.lotes" dataKey="id" class="datatable">
-            <Column field="nome" header="Nome" sortable></Column>
-            <Column field="tipo" header="Tipo" sortable></Column>
-            <Column field="plantios" header="Plantios" sortable></Column>
+          <!-- <DataTable :value="lotes" dataKey="id" class="datatable">
+            <Column field="nome"></Column>
+            <Column field="plantios">
+              <template #body="slotProps">
+
+                {{ slotProps.data }}
+
+              </template>
+</Column>
+</DataTable> -->
+
+          <DataTable :value="lotes" dataKey="id" class="datatable">
+            <Column field="nome"></Column>
+            <Column field="plantios">
+              <template #body="slotProps">
+
+                <DataTable :value="slotProps.data.plantios" dataKey="index" class="datatable">
+                  <Column field="semente.microverde" header="Microverde"></Column>
+                  <Column field="dataSemeadura" header="Data de Semeadura">
+                    <template #body="slotProps">
+                      <span>{{ slotProps.data.dataSemeadura.toDate().toLocaleDateString() }}</span>
+                    </template>
+                  </Column>
+                  <Column field="dataIdaBlackout" header="Data de Blackout">
+                    <template #body="slotProps">
+                      <span>{{ slotProps.data.dataIdaBlackout.toDate().toLocaleDateString() }}</span>
+                    </template>
+                  </Column>
+                  <Column field="dataIdaEstufa" header="Data de Estufa">
+                    <template #body="slotProps">
+                      <span>{{ slotProps.data.dataIdaEstufa.toDate().toLocaleDateString() }}</span>
+                    </template>
+                  </Column>
+                  <Column field="dataColheita" header="Data de Colheita">
+                    <template #body="slotProps">
+                      <span>{{ slotProps.data.dataColheita.toDate().toLocaleDateString() }}</span>
+                    </template>
+                  </Column>
+
+                  <Column field="estado" header="Estado"></Column>
+
+                </DataTable>
+
+              </template>
+            </Column>
           </DataTable>
         </div>
         <div>
@@ -246,10 +287,19 @@ import { useEspecsStore } from '../stores/especs';
 
 import { onBeforeMount, onUpdated, ref, watch } from 'vue';
 
+
+
+const sementesStore = useSementesStore();
+const lotesStore = useLotesStore();
+const especsStore = useEspecsStore();
+
+
 const colunasEspecs = ref([
   { field: 'item', header: 'Item' },
   { field: 'valor', header: 'Valor' },
 ]);
+
+
 
 
 
@@ -344,11 +394,13 @@ const salvarNovoLote = () => {
     });
     const lote = { ...lotedodialog.value, plantios: plantiosdoDialog.value };
     // console.log(lote);
-    useLotesStore().addLote(lote);
+    lotesStore.addLote(lote);
+    geraLotesPeloLotesStore();
 
     hideDialogLote();
   }
 };
+
 
 
 const addplantio = () => {
@@ -461,9 +513,15 @@ const openNewEspecEmbalagem = () => {
 
 
 
-const sementesStore = useSementesStore();
-const lotesStore = useLotesStore();
-const especsStore = useEspecsStore();
+watch(() => lotesStore.lotes, () => {
+  geraLotesPeloLotesStore();
+});
+
+const lotes = ref([]);
+
+const geraLotesPeloLotesStore = () => {
+  lotes.value = useLotesStore().lotes;
+};
 
 
 onBeforeMount(() => {

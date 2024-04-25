@@ -84,5 +84,20 @@ export const useLotesStore = defineStore("lotes", {
         console.error("Erro adicionando lote: ", e);
       }
     },
+
+    async changePlantioEstado(loteId, indexPlantio, estado) {
+      try {
+        const docRef = doc(db, "lotes", loteId);
+        let index = this.lotes.findIndex((lote) => lote.id == loteId);
+        let plantios = this.lotes[index].plantios;
+        plantios[indexPlantio].estado = estado;
+        await updateDoc(docRef, { plantios: plantios }).then(() => {
+          this.lotes[index].plantios = plantios;
+        });
+      } catch (e) {
+        alert("Erro alterando estado do plantio: ", e);
+        console.error("Erro alterando estado do plantio: ", e);
+      }
+    },
   },
 });

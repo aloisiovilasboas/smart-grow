@@ -26,11 +26,21 @@
             <div v-if="insertblocododialog.bloco">
               <Card class="cardPlantio">
                 <template #content>
-                  <div v-for="plantio in insertblocododialog.bloco.plantios" :key="plantio.id">
-                    <span style="padding: 1em">{{ plantio.dia }} </span>
-                    <span style="padding: 1em">{{ plantio.especSemente.microverde }} </span>
+                  <div v-for="plantio in insertblocododialog.bloco.plantios" :key="plantio.id" style="padding: 1em;"
+                    class="grid">
+                    <span style="padding: 0.5em" class="col">{{ plantio.dia }} </span>
+                    <span style="padding: 0.5em" class="col">{{ plantio.especSemente.microverde }} </span>
 
-                    <span style="padding: 1em">{{ plantio.numBandejas + ' bandejas' }} </span>
+                    <span style="padding: 0.5em; white-space: nowrap;" class="col">{{ plantio.numBandejas +
+              'bandeja(s)' }}
+                    </span>
+                    <span class="col">
+                      <!--  <label for="semente">Semente</label> -->
+                      <Dropdown v-model="plantio.semente" :options="sementesStore.sementes" placeholder="Semente"
+                        optionLabel=sementeDisplay checkmark :highlightOnSelect="false" />
+                      <small class="p-error" v-if="submitted && !plantio.semente">Esse campo não pode ficar em
+                        branco</small>
+                    </span>
                   </div>
                 </template>
               </Card>
@@ -38,9 +48,23 @@
             </div>
 
             <div class="field">
-              <label for="data">Semana de colheita</label>
-              <Calendar id="data" v-model="insertblocododialog.dataColheita" required="true"
-                :invalid="submitted && !insertblocododialog.dataColheita" />
+              <label for="data">Domingo da Semana de Colheita</label>
+              <Calendar id="data" :showWeek="true" v-model="insertblocododialog.dataColheita"
+                :disabledDays="[1, 2, 3, 4, 5, 6]" required="true"
+                :invalid="submitted && !insertblocododialog.dataColheita">
+                <!-- <template #date="slotProps">
+                  <span>{{ slotProps }}</span>
+
+                </template> -->
+
+                <!-- <template #day="slotProps">
+                  <span v-if="slotProps.day > 0">{{ slotProps.day }}</span>
+                  <template v-else> <span>&nbsp;</span> </template>
+                </template> -->
+                <template #weekheaderlabel>
+                  <span>N° Semana</span>
+                </template>
+              </Calendar>
               <small class="p-error" v-if="submitted && !insertblocododialog.dataColheita">Esse campo não pode ficar em
                 branco</small>
             </div>
@@ -455,6 +479,12 @@ const dias = ref([
   { dia: 'Sexta' },
   { dia: 'Sábado' },
 ]);
+
+const microverdeEFornecedor = (semente) => {
+  if (!semente) { return ''; }
+  else
+    return semente.microverde;
+};
 
 const datasSemana = ref([{ data: new Date() }, { data: new Date() }, { data: new Date() }, { data: new Date() }, { data: new Date() }, { data: new Date() }, { data: new Date() }]);
 

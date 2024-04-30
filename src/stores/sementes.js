@@ -38,7 +38,12 @@ export const useSementesStore = defineStore("sementes", {
         .then((snapshot) => {
           this.sementes = [];
           snapshot.docs.forEach((doc) => {
-            let semente = { ...doc.data(), id: doc.id };
+            let semente = {
+              ...doc.data(),
+              id: doc.id,
+              sementeDisplay:
+                doc.data().microverde + " - " + doc.data().fornecedor,
+            };
 
             this.sementes.push(semente);
           });

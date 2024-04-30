@@ -44,8 +44,7 @@
 
       <TabPanel header="Especificações" :disabled="false">
 
-        <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.especSementes"
-          dataKey="id">
+        <DataTable sortField="microverde" :sortOrder="1" :size=small :value="sementesStore.especSementes" dataKey="id">
           <Column v-for=" col  of  colunasEspecSementes " :key="col.field" :field="col.field" sortable
             :header="col.header" style="min-width: 5rem; text-align: center;">
 
@@ -81,7 +80,7 @@
       </div>
       <div class="field">
         <label for="especSemente"> Especificação </label>
-        <Dropdown id="especSemente" v-model="sementedodialog.especSemente" :options="sementesStore.especSementes"
+        <Dropdown id="especSemente" v-model="sementedodialog.especSemente" filter :options="sementesStore.especSementes"
           optionLabel="microverde" optionValue="id" placeholder="Selecione uma especificação"
           :invalid="submitted && !sementedodialog.especSemente" />
 

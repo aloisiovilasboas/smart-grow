@@ -6,7 +6,7 @@
           <div class="flex flex-column ">
             <Button label="Novo Lote" icon="pi pi-plus" class="mr-2" @click="openNewLote" />
           </div>
-          <div class="flex flex-column ">
+          <div class="flex flex-column " v-if="false">
             <Button label="Novo Bloco" icon="pi pi-plus" class="mr-2" @click="insertBloco" />
           </div>
         </div>
@@ -90,18 +90,18 @@
         </div> -->
         <div style="padding-top: 1rem;">
           <label for="mescol">Mês: </label>
-          <Calendar v-model="mes" view="month" id="mescol" dateFormat="mm/yy" />
+          <Calendar v-model="mes" view="month" id="mescol" dateFormat="mm/yy" placeholder="Selecione o Mês" />
         </div>
         <div>
           <div>
-            <TabView v-if="temPlantioNoMes" class="flex flex-column">
-              <TabPanel v-for="semana in meses[numeroMes].semanas" :key="semana.domingo" :header="semana.titulo">
+            <TabView class="flex flex-column">
+              <TabPanel v-for="semana in semanasDoMesSelecionado" :key="semana.domingo" :header="semana.titulo">
                 <div class="flex flex-row flex-wrap">
-                  <div v-for="(data, index) in datasSemana" class="flex flex-column" style="width: 14.28%">
+                  <div v-for="(data, index) in semana.dias" class="flex flex-column" style="width: 14.28%">
                     <div>
-                      <!-- date.setDate(date.getDate() + 1); -->
+
                       <span class="word-data">
-                        {{ new Date(semana.domingoDate.getTime() + (24 * 60 * 60 * 1000) * index).toLocaleDateString()
+                        {{ new Date(semana.domingo.getTime() + (24 * 60 * 60 * 1000) * index).toLocaleDateString()
                         }}
                       </span>
                     </div>
@@ -118,9 +118,13 @@
                 </div>
                 <Divider> </Divider>
                 <div class="flex flex-row flex-wrap">
-                  <div v-for="(dia, index) in dias" :key="dia.dia" class="flex flex-column" style="width: 14.28%">
-                    <div v-for="acao in meses[numeroMes][semana.domingo].dias[index]" :key="acao.data"
-                      style="padding: 0.5rem;">
+                  <div v-for="(dia, index) in semana.dias" :key="dia" class="flex flex-column" style="width: 14.28%">
+                    <div style="padding: 0.2rem">
+                      <Button
+                        @click="openNewLoteSimples(dia, new Date(semana.domingo.getTime() + (24 * 60 * 60 * 1000) * index))"
+                        small icon="pi pi-plus" rounded outlined aria-label="Filter" />
+                    </div>
+                    <div v-for="acao in semana.dias[index]" :key="acao" style="padding: 0.5rem;">
                       <div class="cardTarefas" :style="{ 'background-color': achaBG(acao.acao) }">
                         <span class="word-large">{{ acao.plantio }}</span>
                         <span class="word-small">{{ acao.lote }}</span>
@@ -130,9 +134,82 @@
                   </div>
                 </div>
               </TabPanel>
+
             </TabView>
           </div>
         </div>
+        <div>
+          <Dialog v-model:visible="loteSimplesDialog" :style="{ width: '70%' }" header="Nova Colheita" :modal="true"
+            class="p-fluid">
+            <template #header>
+              <h3>
+                Nova Produção para
+                {{ lotesimplesdodialog.data.toLocaleDateString() }}
+              </h3>
+            </template>
+
+            <div class="field">
+              <label for="nome">Nome do Lote</label>
+              <InputText id="nome" v-model.trim="lotesimplesdodialog.nome" required="true" autofocus
+                :invalid="submitted && !lotesimplesdodialog.nome" />
+              <small class="p-error" v-if="submitted && !lotesimplesdodialog.nome">Esse campo não pode ficar em
+                branco</small>
+            </div>
+            <div class="field">
+              <label for="microverde">Colheita ou Semeadura</label>
+              <Dropdown v-model="lotesimplesdodialog.tipo" :options="tipos" option-label="tipo" option-value="tipo"
+                placeholder="Colheita" checkmark :highlightOnSelect="false" />
+              <small class="p-error" v-if="submitted && !lotesimplesdodialog.tipo">Esse campo não pode ficar em
+                branco</small>
+            </div>
+            <Card v-for="plantio in plantiosdoDialogsimples" class="cardPlantio">
+              <template #header>
+                <div class="p-d-flex p-jc-between ">
+
+                  <Button icon="pi pi-times" outlined class="p-button-rounded  p-button-contrast"
+                    @click="removeplantiosimples(plantio)" aria-label="Filter" />
+                </div>
+              </template>
+              <template #content>
+                <div class="flex flex-row flex-wrap">
+                  <!-- duas colulas -->
+                  <div class="flex flex-column">
+                    <div class="field">
+                      <label for="microverde">Microverde</label>
+                      <Dropdown v-model="plantio.semente" :options="sementesStore.sementes" optionLabel="microverde"
+                        placeholder="Microverde" checkmark :highlightOnSelect="false" />
+                      <small class="p-error" v-if="submitted && !plantio.semente">Esse campo não pode ficar em
+                        branco</small>
+                    </div>
+                    <div class="field">
+                      <label for="data">Número de bandejas</label>
+                      <InputNumber id="bandejas" v-model="plantio.numBandejas" required="true"
+                        :invalid="submitted && !plantio.numBandejas" />
+
+                      <small class="p-error" v-if="submitted && !plantio.numBandejas">Esse campo não pode ficar em
+                        branco</small>
+                    </div>
+                  </div>
+
+                </div>
+              </template>
+            </Card>
+            <div class="center">
+              <Button icon="pi pi-plus" label="Adicionar Microverde" rounded outlined aria-label="Filter"
+                @click="addplantiosimples" />
+            </div>
+
+
+            <template #footer>
+              <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogLoteSimples" />
+              <Button label="Salvar" icon="pi pi-check" text @click="salvarNovoLoteSimples" />
+            </template>
+
+
+          </Dialog>
+
+        </div>
+
         <div>
           <Dialog v-model:visible="loteDialog" :style="{ width: '70%' }" header="Novo Lote" :modal="true"
             class="p-fluid">
@@ -208,7 +285,7 @@
         </div>
 
       </TabPanel>
-      <TabPanel header="Blocos">
+      <TabPanel header="Blocos" v-if="false">
 
         <div class="flex flex-column ">
           <Button label="Cadastrar Novo Bloco" icon="pi pi-plus" class="mr-2" @click="openNewBloco" />
@@ -273,16 +350,7 @@
                         branco</small>
                     </div>
                   </div>
-                  <!-- <div style="margin: 1rem;" class="flex align-items-left flex-column">
-                    <div class="field">
-                      <label for="data">Custos de Plantio</label>
-                      <div v-for="espec in especsStore.especPlantio" :key="espec.id" class="flex align-items-center">
-                        <Checkbox v-model="plantio.selectedCustosPlantio" :inputId="espec.id" name="item"
-                          :value="espec.item" />
-                        <label :for="espec.id">{{ espec.item }}</label>
-                      </div>
-                    </div>
-                  </div> -->
+
                 </div>
               </template>
             </Card>
@@ -451,11 +519,11 @@ import { useSementesStore } from '../stores/sementes';
 import { useLotesStore } from '../stores/lotes';
 import { useBlocosStore } from '../stores/blocos';
 import { useEspecsStore } from '../stores/especs';
+import { Timestamp } from 'firebase/firestore';
 
 
 
-
-import { onBeforeMount, onUpdated, ref, watch } from 'vue';
+import { onBeforeMount, onMounted, onUpdated, ref, watch, computed } from 'vue';
 
 
 
@@ -492,8 +560,6 @@ const datasSemana = ref([{ data: new Date() }, { data: new Date() }, { data: new
 const mes = ref(new Date());
 
 
-const numeroMes = ref(mes.value.getMonth());
-const numeroAno = ref(mes.value.getFullYear());
 
 
 const selectedTipoLote = ref();
@@ -510,9 +576,11 @@ const ehEditLote = ref(false);
 
 const blocododialog = ref({});
 const lotedodialog = ref({});
+const lotesimplesdodialog = ref({});
 
 const blocoDialog = ref(false);
 const loteDialog = ref(false);
+const loteSimplesDialog = ref(false);
 
 const submitted = ref(false);
 
@@ -520,6 +588,7 @@ const deleteEspecDialogPlantio = ref(false);
 const deleteEspecDialogEmbalagem = ref(false);
 
 const plantiosdoDialog = ref([]);
+const plantiosdoDialogsimples = ref([]);
 
 
 
@@ -565,6 +634,13 @@ const hideDialogLote = () => {
   plantiosdoDialog.value = [];
 };
 
+const hideDialogLoteSimples = () => {
+  loteSimplesDialog.value = false;
+  lotesimplesdodialog.value = {};
+  submitted.value = false;
+  plantiosdoDialogsimples.value = [];
+};
+
 const hideDialogBloco = () => {
   blocoDialog.value = false;
   blocododialog.value = {};
@@ -579,6 +655,91 @@ const hideInsertBlocoDialog = () => {
 };
 
 
+const openNewLoteSimples = (dia, data) => {
+  console.log(dia);
+  console.log(data.toLocaleDateString());
+  lotesimplesdodialog.value = { nome: '', data: data };
+
+
+  submitted.value = false;
+  loteSimplesDialog.value = true;
+};
+
+const salvarNovoLoteSimples = () => {
+  submitted.value = true;
+
+
+
+  if (lotesimplesdodialog.value.nome) {
+    plantiosdoDialogsimples.value.forEach(plantio => {
+      //encontra a espec semente daquela semente
+      let especPlantio = sementesStore.especSementes.find((espec) => espec.id == plantio.semente.especSemente);
+
+      //pega no especPlantio a gramas por bandeja
+      plantio.gramasBandejaPlantio = especPlantio.gramasBandejaPlantio;
+
+      //calcula datas de plantio, blackout e estufa
+      //data do plantio: data da colheita menos a quantidade de dias que está na espec semente
+
+      //seta plantio.data colheita com a data do de plantiosdoDialogsimples.value.data no formato date
+
+      //se lotesimplesdodialog.value.tipo for Colheita, então lotesimplesdodialog.value.data é a colheita, senão é a semeadura
+      console.log(lotesimplesdodialog.value.tipo);
+      if (lotesimplesdodialog.value.tipo == 'Colheita') {
+        plantio.dataColheita = new Date(lotesimplesdodialog.value.data);
+      } else {
+        console.log('entrou no else');
+        console.log(especPlantio.diasAteAColheita);
+        //adiciona os dias de colheita na data de semeadura de acordo com o especPlantio
+        plantio.dataColheita = new Date(lotesimplesdodialog.value.data);
+        plantio.dataColheita.setDate(plantio.dataColheita.getDate() + especPlantio.diasAteAColheita);
+
+
+
+
+        console.log(plantio.dataColheita);
+
+
+      }
+
+
+
+
+      let dataSemeadura = new Date(plantio.dataColheita - especPlantio.diasAteAColheita * 24 * 60 * 60 * 1000);
+
+      //plantio.dataSemeadura é a dataSemeadura em timestamp
+      plantio.dataSemeadura = Timestamp.fromDate(dataSemeadura);
+
+      let dataIdaBlackout = new Date(plantio.dataColheita - (especPlantio.diasAteAColheita - especPlantio.diasEmPilha) * 24 * 60 * 60 * 1000);
+
+      plantio.dataIdaBlackout = Timestamp.fromDate(dataIdaBlackout);
+
+      let dataIdaEstufa = new Date(plantio.dataColheita - (especPlantio.diasAteAColheita - especPlantio.diasEmPilha - especPlantio.blackout) * 24 * 60 * 60 * 1000);
+
+      plantio.dataIdaEstufa = Timestamp.fromDate(dataIdaEstufa);
+
+      plantio.dataColheita = Timestamp.fromDate(plantio.dataColheita);
+
+      plantio.estado = 'Pré-plantio';
+
+      delete plantio.semente.valorBruto
+      delete plantio.semente.percentualICMS
+      delete plantio.semente.fornecedor
+
+    });
+    const lote = { ...lotesimplesdodialog.value, plantios: plantiosdoDialogsimples.value };
+
+    lotesStore.addLote(lote).then(() => {
+
+      preenchePlantiosDict();
+
+    });
+    hideDialogLoteSimples();
+
+
+  }
+
+};
 
 const salvarNovoLote = () => {
   submitted.value = true;
@@ -594,9 +755,23 @@ const salvarNovoLote = () => {
       //calcula datas de plantio, blackout e estufa
       //data do plantio: data da colheita menos a quantidade de dias que está na espec semente
 
-      plantio.dataSemeadura = new Date(plantio.dataColheita - especPlantio.diasAteAColheita * 24 * 60 * 60 * 1000);
-      plantio.dataIdaBlackout = new Date(plantio.dataColheita - (especPlantio.diasAteAColheita - especPlantio.diasEmPilha) * 24 * 60 * 60 * 1000);
-      plantio.dataIdaEstufa = new Date(plantio.dataColheita - (especPlantio.diasAteAColheita - especPlantio.diasEmPilha - especPlantio.blackout) * 24 * 60 * 60 * 1000);
+
+
+      let dataSemeadura = new Date(plantio.dataColheita - especPlantio.diasAteAColheita * 24 * 60 * 60 * 1000);
+
+      //plantio.dataSemeadura é a dataSemeadura em timestamp
+      plantio.dataSemeadura = Timestamp.fromDate(dataSemeadura);
+
+      let dataIdaBlackout = new Date(plantio.dataColheita - (especPlantio.diasAteAColheita - especPlantio.diasEmPilha) * 24 * 60 * 60 * 1000);
+
+      plantio.dataIdaBlackout = Timestamp.fromDate(dataIdaBlackout);
+
+      let dataIdaEstufa = new Date(plantio.dataColheita - (especPlantio.diasAteAColheita - especPlantio.diasEmPilha - especPlantio.blackout) * 24 * 60 * 60 * 1000);
+
+      plantio.dataIdaEstufa = Timestamp.fromDate(dataIdaEstufa);
+
+      plantio.dataColheita = Timestamp.fromDate(plantio.dataColheita);
+
       plantio.estado = 'Pré-plantio';
 
       delete plantio.semente.valorBruto
@@ -612,11 +787,14 @@ const salvarNovoLote = () => {
     });
     const lote = { ...lotedodialog.value, plantios: plantiosdoDialog.value };
 
-    lotesStore.addLote(lote);
+    lotesStore.addLote(lote).then(() => {
 
+      preenchePlantiosDict();
+
+    });
     hideDialogLote();
-    calculaSemanas();
-    temPlantioNoMes.value = meses.value[numeroMes.value] ? true : false;
+
+
   }
 };
 
@@ -664,6 +842,13 @@ const achaBG = (acao) => {
   }
 };
 
+// DD - SS
+const semanasDoMesSelecionado = computed(() => {
+  return preencheSemanasDoMes();
+})
+
+
+
 
 const addplantio = () => {
   plantiosdoDialog.value.push({ selectedCustosPlantio: [] });
@@ -673,8 +858,15 @@ const addplantiobloco = () => {
   plantiosdoDialogBloco.value.push({});
 };
 
+const addplantiosimples = () => {
+  plantiosdoDialogsimples.value.push({});
+};
+
 const removeplantio = (plantio) => {
   plantiosdoDialog.value = plantiosdoDialog.value.filter(p => p !== plantio);
+};
+const removeplantiosimples = (plantio) => {
+  plantiosdoDialogsimples.value = plantiosdoDialogsimples.value.filter(p => p !== plantio);
 };
 const removeplantiobloco = (plantio) => {
   plantiosdoDialogBloco.value = plantiosdoDialogBloco.value.filter(p => p !== plantio);
@@ -690,6 +882,10 @@ const diasSemana = ref([
   { dia: 'Sábado' },
 ]);
 
+const tipos = ref([
+  { tipo: 'Semeadura' },
+  { tipo: 'Colheita' },
+]);
 
 const especdodialog = ref({});
 const especDialogPlantio = ref(false);
@@ -809,19 +1005,59 @@ const temPlantioNoMes = ref(false);
 
 
 watch(() => mes.value, () => {
-  numeroMes.value = mes.value.getMonth();
-  numeroAno.value = mes.value.getFullYear();
-  console.log(lotesStore.lotes);
-  temPlantioNoMes.value = meses.value[numeroMes.value] ? true : false;
+  preencheSemanasDoMes();
 
 });
 
-watch(() => lotesStore.lotes, () => {
-  calculaSemanas();
-  console.log(lotesStore.lotes);
-  //verifica se tem plantio no mes
-  temPlantioNoMes.value = meses.value[numeroMes.value] ? true : false;
-});
+
+
+
+const preencheSemanasDoMes = () => {
+
+
+  // calcula semanas do mes selecionado onde semana = {diaInicio: Date, diaFim: Date, acoesplantios: [acaoplantio1, acaoplantio2, ...]}
+  // semanas do mes selecionado se dará da seguinte forma: semanasDoMesSelecionado = [semana1, semana2, semana3, ...] onde diaInicio da semana1 é o primeiro domingo do mes e diaFim da semana1 é o primeiro sábado do mes, diaInicio da semana2 é o segundo domingo do mes e diaFim da semana2 é o segundo sábado do mes, e assim por diante
+  let semanasDoMesSelecionado = [];
+
+  let primeiroDia = new Date(mes.value.getFullYear(), mes.value.getMonth(), 1);
+  //calcula o primeiro domingo do mes
+  let primeiroDomingo = new Date(primeiroDia);
+  primeiroDomingo.setDate(primeiroDia.getDate() - primeiroDia.getDay());
+  // esse calculo resulta no domingo da semana anterior ao mes selecionado, então adiciona 7 dias para obter o primeiro domingo do mes selecionado. Mas se o primeiro domingo for o primeiro dia do mes, não adiciona 7 dias
+  if (primeiroDomingo.getDate() != 1)
+    primeiroDomingo.setDate(primeiroDomingo.getDate() + 7);
+
+  // calcula todos os domingos do mes
+  let domingos = [];
+  let domingo = new Date(primeiroDomingo);
+
+  while (domingo.getMonth() == mes.value.getMonth()) {
+    domingos.push(domingo);
+    domingo = new Date(domingo);
+    domingo.setDate(domingo.getDate() + 7);
+  }
+
+  // para cada domingo, calcula a semana
+  domingos.forEach(domingo => {
+    let finalSemana = new Date(domingo);
+    finalSemana.setDate(domingo.getDate() + 6);
+
+    let semana = { titulo: (domingo.toLocaleDateString().slice(0, -5) + ' - ' + finalSemana.toLocaleDateString()).slice(0, -5), domingo: domingo, domingoDate: domingo.getDate(), dias: [[], [], [], [], [], [], []] };
+    for (let i = 0; i < 7; i++) {
+      //calcula semanaDias de acordo com o plantiosDict
+      // para cada dia na semana, verifica se tem plantio naquele dia, se tiver, adiciona o plantio na semana
+      let dia = new Date(domingo);
+      dia.setDate(domingo.getDate() + i);
+      semana.dias[i] = plantiosDict.value[dia] ? plantiosDict.value[dia] : [];
+
+    }
+    semanasDoMesSelecionado.push(semana);
+  });
+
+  semanasDoMesSelecionado.sort((a, b) => a.domingo - b.domingo);
+
+  return semanasDoMesSelecionado;
+}
 
 
 
@@ -841,6 +1077,48 @@ meses = [
 A semana começa no domingo e termina no sábado
  
 */
+// watch lotes
+watch(() => lotesStore.lotes, () => {
+  preenchePlantiosDict();
+});
+
+const plantiosDict = ref({});
+
+//preenche o plantiosDict com os plantios de cada lote onde a chave do dicionário é a data de ação do plantio e o valor é um array de plantios com todos os plantios com aquela data de ação seja semeadura, blackout, estufa ou colheita
+
+const preenchePlantiosDict = () => {
+  plantiosDict.value = {};
+  lotesStore.lotes.forEach(lote => {
+    lote.plantios.forEach(plantio => {
+      /*   console.log(plantio); */
+      let dataColheita = plantio.dataColheita.toDate();
+      let dataSemeadura = plantio.dataSemeadura.toDate();
+      let dataIdaBlackout = plantio.dataIdaBlackout.toDate();
+      let dataIdaEstufa = plantio.dataIdaEstufa.toDate();
+
+      if (!plantiosDict.value[dataColheita]) {
+        plantiosDict.value[dataColheita] = [];
+      }
+      plantiosDict.value[dataColheita].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'COLHEITA' });
+
+      if (!plantiosDict.value[dataSemeadura]) {
+        plantiosDict.value[dataSemeadura] = [];
+      }
+      plantiosDict.value[dataSemeadura].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'SEMEADURA' });
+
+      if (!plantiosDict.value[dataIdaBlackout]) {
+        plantiosDict.value[dataIdaBlackout] = [];
+      }
+      plantiosDict.value[dataIdaBlackout].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'BLACKOUT' });
+
+      if (!plantiosDict.value[dataIdaEstufa]) {
+        plantiosDict.value[dataIdaEstufa] = [];
+      }
+      plantiosDict.value[dataIdaEstufa].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'ESTUFA' });
+    });
+  });
+};
+
 
 
 const calculaSemanas = () => {
@@ -859,8 +1137,6 @@ const calculaSemanas = () => {
         //Calcula o primeiro dia da semana de acordo com a data.data
         var diaSemana = data.data.getDay();
         var inicioSemana = new Date(data.data);
-
-
         inicioSemana.setDate(data.data.getDate() - diaSemana);
         var finalSemana = new Date(inicioSemana);
         finalSemana.setDate(inicioSemana.getDate() + 6);
@@ -917,9 +1193,11 @@ onBeforeMount(() => {
   sementesStore.fetchSementes();
   sementesStore.fetchEspecSementes();
   lotesStore.fetchLotes()
+
   blocosStore.fetchBlocos();
   especsStore.fetchEspecPlantio();
   especsStore.fetchEspecEmbalagens();
+
 
 
 });

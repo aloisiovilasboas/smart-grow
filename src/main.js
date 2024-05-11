@@ -47,7 +47,11 @@ const app = createApp(App);
 app.use(ToastService);
 
 app.use(router);
-app.use(PrimeVue);
+//importa locale de assets/pt-br.json
+import locale from "./assets/pt-br.json";
+app.use(PrimeVue, {
+  locale: locale["pt-br"],
+});
 
 import Column from "primevue/column";
 import Dialog from "primevue/dialog";

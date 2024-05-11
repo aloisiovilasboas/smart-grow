@@ -123,6 +123,18 @@ button:focus-visible {
   color: #adcc4a;
 }
 
+.p-multiselect {
+  min-width: 17rem;
+}
+.p-multiselect-label {
+  display: flex;
+  flex-wrap: wrap;
+}
+.p-multiselect-token {
+  margin: 0.1rem;
+  font-size: x-small;
+}
+
 .word-small {
   padding-top: 0.2hw;
   font-size: min(1.5vw, 14px);

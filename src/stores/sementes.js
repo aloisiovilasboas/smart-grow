@@ -9,6 +9,7 @@ import {
   doc,
   deleteDoc,
   updateDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { funcoesCRUD } from "@/services/firebaseFunctions";
@@ -41,8 +42,6 @@ export const useSementesStore = defineStore("sementes", {
             let semente = {
               ...doc.data(),
               id: doc.id,
-              sementeDisplay:
-                doc.data().microverde + " - " + doc.data().fornecedor,
             };
 
             this.sementes.push(semente);
@@ -128,9 +127,10 @@ export const useSementesStore = defineStore("sementes", {
     },
     async addSemente(s) {
       try {
+        s.disponivel = true;
         const docRef = await addDoc(collection(db, "sementes"), s);
         s.id = docRef.id;
-        this.sementes.push(s);
+        this.sementes.unshift(s);
       } catch (e) {
         alert("Erro adicionando semente: ", e);
         console.error("Erro adicionando semente: ", e);

@@ -14,7 +14,6 @@ import { db } from "../services/firebase";
 export const useLotesStore = defineStore("lotes", {
   state: () => {
     const lotes = [];
-    const mudouint = ref(0);
 
     const setLotes = (newvalue) => {
       lotes.value = newvalue;
@@ -22,7 +21,6 @@ export const useLotesStore = defineStore("lotes", {
 
     return {
       lotes,
-      mudouint,
 
       setLotes,
       /* setSementes, */
@@ -69,7 +67,6 @@ export const useLotesStore = defineStore("lotes", {
         await deleteDoc(docRef).then(() => {
           this.lotes.splice(index, 1);
         });
-        this.mudouint++;
       } catch (e) {
         alert("Erro deletando lote: ", e);
         console.error("Erro deletando lote: ", e);
@@ -83,7 +80,6 @@ export const useLotesStore = defineStore("lotes", {
         s.id = docRef.id;
         //adiciona na primeira posicao do array
         this.lotes.unshift(s);
-        this.mudouint++;
       } catch (e) {
         alert("Erro adicionando lote: ", e);
         console.error("Erro adicionando lote: ", e);
@@ -99,7 +95,6 @@ export const useLotesStore = defineStore("lotes", {
         await updateDoc(docRef, { plantios: plantios }).then(() => {
           this.lotes[index].plantios = plantios;
         });
-        this.mudouint++;
       } catch (e) {
         alert("Erro alterando estado do plantio: ", e);
         console.error("Erro alterando estado do plantio: ", e);

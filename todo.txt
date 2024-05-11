@@ -1,4 +1,26 @@
-Arrumar index.router
+
+
+
+
+
+
+- limpar o que salva no lote
+
+- show lote ao clicar
+- Painel
+- filtros e cores para a aba Lotes
+- editar e excluir plantios e lotes
+- implantar no firebase
+- regras do banco
+- arrumar fetchs
+- bug sort sementes
+- arrumar os IsValid
+
+
+
+
+
+
 
 - Login
     OK
@@ -48,7 +70,7 @@ Arrumar index.router
                 depois de feita a colheita de todos os plantios, habilita botao finalizar lote
                     add numero de caixas
 
-- Sementes (admin)
+- Sementes (admin) OK
     - estoque 
         _crud_ Sementes
             selecionar semente da espec sementes
@@ -61,7 +83,7 @@ Arrumar index.router
         
         
 
-Lotes (admin)
+Lotes (admin) OK
     -producao
         card notificacao(!)(x)
                 sugerir lotes do bloco pelo historico de venda no dia da semana
@@ -74,7 +96,7 @@ Lotes (admin)
                 valor do substrato(placeholder -especPlantio)
 
         
-        Show lotes  
+        Show lotes 
             Nome lote como header do cartao
             tabela dentro de um card com os plantios 
                 campos calculados: datas de manejo
@@ -87,7 +109,7 @@ Lotes (admin)
                 
                 botao gerar etiquetas
                     
-    -caixas
+    -caixas (x)
             estimativa de venda de caixas por tipo de lote (por sexta e por terça) (ou por dia da semana) 
             add caixa
                 caixas produzidas por lotes
@@ -101,7 +123,7 @@ Lotes (admin)
             _crud_ especPlantio
             substrato
 
-- Usuarios (admin)
+- Usuarios (admin) ok
         editar papeis (nao apto, colaborador, admin)
         ok
 

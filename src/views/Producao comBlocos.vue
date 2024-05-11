@@ -1,13 +1,95 @@
 <template>
   <div class="flex flex-column " style="min-width: 700px;">
     <TabView>
-      <TabPanel header="Calendário">
-
-        <!-- div abaixo centralizado, width 100% e justify-content-start -->
-        <div class="flex flex-row flex-wrap align-items-center" style="padding-top: 1rem;">
-          <div style="padding-right: 10px;">
-            <label for="mescol">Mês: </label>
+      <TabPanel header="Lotes">
+        <div class="grid grid-cols-2">
+          <div class="flex flex-column ">
+            <Button label="Novo Lote" icon="pi pi-plus" class="mr-2" @click="openNewLote" />
           </div>
+          <div class="flex flex-column " v-if="false">
+            <Button label="Novo Bloco" icon="pi pi-plus" class="mr-2" @click="insertBloco" />
+          </div>
+        </div>
+
+        <div>
+          <Dialog v-model:visible="insertblocodialog" :style="{ width: '70%' }" header="Inserir Bloco" :modal="true"
+            class="p-fluid">
+
+            <div class="field">
+              <label for="nome">Nome do bloco</label>
+              <Dropdown v-model="insertblocododialog.bloco" :options="blocosStore.blocos" optionLabel="nome" checkmark
+                :highlightOnSelect="false" />
+              <small class="p-error" v-if="submitted && !insertblocododialog.bloco">Esse campo não pode ficar em
+                branco</small>
+            </div>
+
+            <div v-if="insertblocododialog.bloco">
+              <Card class="cardPlantio">
+                <template #content>
+                  <div v-for="plantio in insertblocododialog.bloco.plantios" :key="plantio.id" style="padding: 1em;"
+                    class="grid">
+                    <span style="padding: 0.5em" class="col">{{ plantio.dia }} </span>
+                    <span style="padding: 0.5em" class="col">{{ plantio.especSemente.microverde }} </span>
+
+                    <span style="padding: 0.5em; white-space: nowrap;" class="col">{{ plantio.numBandejas +
+              'bandeja(s)' }}
+                    </span>
+                    <span class="col">
+                      <!--  <label for="semente">Semente</label> -->
+                      <Dropdown v-model="plantio.semente" :options="sementesStore.sementes" placeholder="Semente"
+                        optionLabel=microverde checkmark :highlightOnSelect="false" />
+                      <small class="p-error" v-if="submitted && !plantio.semente">Esse campo não pode ficar em
+                        branco</small>
+                    </span>
+                  </div>
+                </template>
+              </Card>
+
+            </div>
+
+            <div class="field">
+              <label for="data">Domingo da Semana de Colheita</label>
+              <Calendar id="data" :showWeek="true" v-model="insertblocododialog.dataColheita"
+                :disabledDays="[1, 2, 3, 4, 5, 6]" required="true"
+                :invalid="submitted && !insertblocododialog.dataColheita">
+                <!-- <template #date="slotProps">
+                  <span>{{ slotProps }}</span>
+
+                </template> -->
+
+                <!-- <template #day="slotProps">
+                  <span v-if="slotProps.day > 0">{{ slotProps.day }}</span>
+                  <template v-else> <span>&nbsp;</span> </template>
+                </template> -->
+                <template #weekheaderlabel>
+                  <span>N° Semana</span>
+                </template>
+              </Calendar>
+              <small class="p-error" v-if="submitted && !insertblocododialog.dataColheita">Esse campo não pode ficar em
+                branco</small>
+            </div>
+
+            <template #footer>
+              <Button label="Cancelar" icon="pi pi-times" text @click="hideInsertBlocoDialog" />
+              <Button label="Salvar" icon="pi pi-check" text @click="salvarInsertBloco" />
+            </template>
+
+
+          </Dialog>
+
+        </div>
+
+
+
+        <!--  <div class="flex flex-column ">
+          <Button label="Novo Lote" icon="pi pi-plus" class="mr-2" @click="openNewLote" />
+        </div>
+        <span style="padding: 1em;"> </span>
+        <div class="flex flex-column ">
+          <Button label="Incluir Bloco" icon="pi pi-plus" class="mr-2" @click="openNewLote" />
+        </div> -->
+        <div style="padding-top: 1rem;">
+          <label for="mescol">Mês: </label>
           <Calendar v-model="mes" view="month" id="mescol" dateFormat="mm/yy" placeholder="Selecione o Mês" />
         </div>
         <div>
@@ -77,7 +159,7 @@
             <div class="field">
               <label for="microverde">Colheita ou Semeadura</label>
               <Dropdown v-model="lotesimplesdodialog.tipo" :options="tipos" option-label="tipo" option-value="tipo"
-                placeholder="Semeadura" checkmark :highlightOnSelect="false" />
+                placeholder="Colheita" checkmark :highlightOnSelect="false" />
               <small class="p-error" v-if="submitted && !lotesimplesdodialog.tipo">Esse campo não pode ficar em
                 branco</small>
             </div>
@@ -95,8 +177,8 @@
                   <div class="flex flex-column">
                     <div class="field">
                       <label for="microverde">Microverde</label>
-                      <Dropdown v-model="plantio.semente" :options="optionsSementes" optionLabel="label" filter
-                        optionValue="value" placeholder="Microverde" checkmark :highlightOnSelect="false" />
+                      <Dropdown v-model="plantio.semente" :options="sementesStore.sementes" optionLabel="microverde"
+                        placeholder="Microverde" checkmark :highlightOnSelect="false" />
                       <small class="p-error" v-if="submitted && !plantio.semente">Esse campo não pode ficar em
                         branco</small>
                     </div>
@@ -154,15 +236,15 @@
                   <div class="flex flex-column">
                     <div class="field">
                       <label for="microverde">Microverde</label>
-                      <Dropdown v-model="plantio.semente" :options="optionsSementes" optionLabel="label" filter
-                        optionValue="value" placeholder="Microverde" checkmark :highlightOnSelect="false" />
+                      <Dropdown v-model="plantio.semente" :options="sementesStore.sementes" optionLabel="microverde"
+                        placeholder="Microverde" checkmark :highlightOnSelect="false" />
                       <small class="p-error" v-if="submitted && !plantio.semente">Esse campo não pode ficar em
                         branco</small>
                     </div>
                     <div class="field">
                       <label for="data">Data da colheita</label>
                       <Calendar id="data" v-model="plantio.dataColheita" required="true"
-                        :invalid="submitted && !plantio.dataColheita" />
+                        :invalid="submitted && !plantio.data" />
                       <small class="p-error" v-if="submitted && !plantio.dataColheita">Esse campo não pode ficar em
                         branco</small>
                     </div>
@@ -175,7 +257,16 @@
                         branco</small>
                     </div>
                   </div>
-
+                  <!-- <div style="margin: 1rem;" class="flex align-items-left flex-column">
+                    <div class="field">
+                      <label for="data">Custos de Plantio</label>
+                      <div v-for="espec in especsStore.especPlantio" :key="espec.id" class="flex align-items-center">
+                        <Checkbox v-model="plantio.selectedCustosPlantio" :inputId="espec.id" name="item"
+                          :value="espec.item" />
+                        <label :for="espec.id">{{ espec.item }}</label>
+                      </div>
+                    </div>
+                  </div> -->
                 </div>
               </template>
             </Card>
@@ -195,56 +286,211 @@
         </div>
 
       </TabPanel>
+      <TabPanel header="Blocos" v-if="false">
 
-      <TabPanel header="Lotes">
-        <div class="grid grid-cols-2">
-          <div class="flex flex-column ">
-            <Button label="Novo Lote" icon="pi pi-plus" class="mr-2" @click="openNewLote" />
-          </div>
+        <div class="flex flex-column ">
+          <Button label="Cadastrar Novo Bloco" icon="pi pi-plus" class="mr-2" @click="openNewBloco" />
         </div>
         <div>
-          <DataTable :value="destrinchaLotes">
-            <Column field="lote.nome" header="Lote"></Column>
-            <Column field="plantio.semente.microverde" header="Microverde"></Column>
-            <Column field="plantio.dataSemeadura" header="Data de Semeadura">
+          <!-- DataTable com os blocos -->
+          <DataTable :value="blocosStore.blocos" removableSort dataKey="id">
+            <Column field="nome" header="Nome" sortable text-align: left;></Column>
+            <Column field="plantios" header="Colheitas" text-align: left;>
               <template #body="slotProps">
-                <span>{{ slotProps.data.plantio.dataSemeadura.toDate().toLocaleDateString() }}</span>
+                <div v-for="plantio in slotProps.data.plantios" :key="plantio.id">
+                  <span style="padding: 1em">{{ plantio.dia }} </span>
+                  <span style="padding: 1em">{{ plantio.especSemente.microverde }} </span>
+                  <span style="padding: 1em">{{ plantio.numBandejas + ' bandejas' }} </span>
+                </div>
               </template>
-            </Column>
-            <Column field="plantio.dataIdaBlackout" header="Data de ida ao Blackout">
-              <template #body="slotProps">
-                <!-- v-if data de blackout é diferente da data de estufa  -->
-                <span
-                  v-if="slotProps.data.plantio.dataIdaBlackout.toDate().getTime() != slotProps.data.plantio.dataIdaEstufa.toDate().getTime()">{{
-            slotProps.data.plantio.dataIdaBlackout.toDate().toLocaleDateString() }}</span>
-                <!-- v-else  -->
-                <span v-else> Direto para Estufa </span>
-              </template>
-            </Column>
-            <Column field="plantio.dataIdaEstufa" header="Data de ida a Estufa">
-              <template #body="slotProps">
-                <span>{{ slotProps.data.plantio.dataIdaEstufa.toDate().toLocaleDateString() }}</span>
-              </template>
-            </Column>
-
-
-
-
-            <Column field="plantio.dataColheita" header="Data de Colheita">
-              <template #body="slotProps">
-                <span>{{ slotProps.data.plantio.dataColheita.toDate().toLocaleDateString() }}</span>
-              </template>
-            </Column>
-            <Column field="plantio.numBandejas" header="Número de Bandejas" style="text-align: center"></Column>
-            <!-- <Column field="plantio.pendencia" header="Pendência"></Column> -->
-            <!-- Adiciona um botão 'semear' que altera o estado para 'Pilha'  -->
-            <Column field="plantio.estado" header="Estado" style="text-align: center">
             </Column>
           </DataTable>
         </div>
+        <div>
+          <Dialog v-model:visible="blocoDialog" :style="{ width: '70%' }" header="Novo Bloco" :modal="true"
+            class="p-fluid">
+
+            <div class="field">
+              <label for="nome">Nome do Bloco</label>
+              <InputText id="nome" v-model.trim="blocododialog.nome" required="true" autofocus
+                :invalid="submitted && !blocododialog.nome" />
+              <small class="p-error" v-if="submitted && !blocododialog.nome">Esse campo não pode ficar em
+                branco</small>
+            </div>
+            <Card v-for="plantio in plantiosdoDialogBloco" class="cardPlantio">
+              <template #header>
+                <div class="p-d-flex p-jc-between ">
+                  <Button icon="pi pi-times" class="p-button-rounded  p-button-contrast"
+                    @click="removeplantiobloco(plantio)" aria-label="Filter" />
+                </div>
+              </template>
+              <template #content>
+                <div class="flex flex-row flex-wrap">
+                  <!-- duas colulas -->
+                  <div class="flex flex-column">
+                    <div class="field">
+                      <label for="microverde">Microverde</label>
+                      <Dropdown v-model="plantio.especSemente" :options="sementesStore.especSementes"
+                        optionLabel="microverde" placeholder="Microverde" checkmark :highlightOnSelect="false" />
+                      <small class="p-error" v-if="submitted && !plantio.especSemente">Esse campo não pode ficar em
+                        branco</small>
+                    </div>
+                    <div class="field">
+                      <label for="data">Dia da colheita</label>
+                      <Dropdown v-model="plantio.dia" :options="diasSemana" optionLabel="dia" option-value="dia"
+                        checkmark :highlightOnSelect="false" />
+                      <small class="p-error" v-if="submitted && !plantio.dia">Esse campo não pode ficar em
+                        branco</small>
+                    </div>
+                    <div class="field">
+                      <label for="data">Número de bandejas</label>
+                      <InputNumber id="bandejas" v-model="plantio.numBandejas" required="true"
+                        :invalid="submitted && !plantio.numBandejas" />
+
+                      <small class="p-error" v-if="submitted && !plantio.numBandejas">Esse campo não pode ficar em
+                        branco</small>
+                    </div>
+                  </div>
+
+                </div>
+              </template>
+            </Card>
+            <div class="center">
+              <Button icon="pi pi-plus" label="Adicionar Microverde" rounded outlined aria-label="Filter"
+                @click="addplantiobloco" />
+            </div>
+
+            <template #footer>
+              <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogBloco" />
+              <Button label="Salvar" icon="pi pi-check" text @click="salvarNovoBloco" />
+            </template>
+
+
+          </Dialog>
+
+        </div>
+
+
       </TabPanel>
+      <TabPanel header="Custos Plantio">
+        <div>
+          <DataTable sortField="item" :sortOrder="1" :size=small :value="especsStore.especPlantio" dataKey="id">
 
 
+            <Column v-for="col of colunasEspecs" :key="col.field" :field="col.field" sortable :header="col.header"
+              style="min-width: 5rem; text-align: left;">
+            </Column>
+            <!--  <Column :rowEditor="true" style="width: 10%; min-width: 5rem" bodyStyle="text-align:center"></Column> -->
+            <Column :exportable="false" style="min-width:5rem">
+              <template #body="slotProps">
+                <Button icon="pi pi-pencil" outlined severity="secondary" rounded class="mr-2"
+                  @click="editEspecPlantio(slotProps.data)" />
+                <Button icon="pi pi-trash" rounded severity="secondary"
+                  @click="confirmDeleteEspecPlantio(slotProps.data)" />
+              </template>
+            </Column>
+          </DataTable>
+          <Toolbar class="mb-4">
+            <template #start>
+              <Button label="Nova" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewEspecPlantio" />
+            </template>
+          </Toolbar>
+        </div>
+        <div>
+          <Dialog id="plantiodialog" v-model:visible="especDialogPlantio" :style="{ width: '450px' }"
+            header="Novo custo de plantio" :modal="true" class="p-fluid">
+            <div class="field">
+              <label for="item">Item</label>
+              <InputText id="item" v-model.trim="especdodialog.item" required="true" autofocus
+                :invalid="submitted && !especdodialog.item" />
+              <small class="p-error" v-if="submitted && !especdodialog.item">Esse campo não pode ficar em
+                branco</small>
+            </div>
+            <div class="field">
+              <label for="valor">Valor</label>
+              <InputNumber id="valor" v-model="especdodialog.valor" required="true" mode="currency" currency="BRL"
+                locale="pt-BR" autofocus :invalid="submitted && !especdodialog.valor" />
+              <small class="p-error" v-if="submitted && !especdodialog.valor">Esse campo não pode ficar em
+                branco</small>
+            </div>
+
+            <template #footer>
+              <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogEspecPlantio" />
+              <Button label="Salvar" icon="pi pi-check" text @click="salvarNovaEspecPlantio" />
+            </template>
+          </Dialog>
+          <Dialog v-model:visible="deleteEspecDialogPlantio" :style="{ width: '450px' }" header="Confirmar"
+            :modal="true">
+            <div class="confirmation-content">
+              <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+              <span v-if="especdodialog">Tem certeza que deseja deletar <b>{{ especdodialog.item }}</b>?</span>
+            </div>
+            <template #footer>
+              <Button label="Não" icon="pi pi-times" text @click="deleteEspecDialogPlantio = false" />
+              <Button label="Sim" icon="pi pi-check" text @click="deleteEspecPlantio" />
+            </template>
+          </Dialog>
+        </div>
+      </TabPanel>
+      <TabPanel header="Custos Embalagens">
+
+        <div>
+          <DataTable sortField="item" :sortOrder="1" :size=small :value="especsStore.especEmbalagens" dataKey="id">
+            <Column v-for="col of colunasEspecs" :key="col.field" :field="col.field" sortable :header="col.header"
+              style="min-width: 5rem; text-align: left;">
+            </Column>
+            <!--  <Column :rowEditor="true" style="width: 10%; min-width: 5rem" bodyStyle="text-align:center"></Column> -->
+            <Column :exportable="false" style="min-width:5rem">
+              <template #body="slotProps">
+                <Button icon="pi pi-pencil" outlined severity="secondary" rounded class="mr-2"
+                  @click="editEspecEmbalagem(slotProps.data)" />
+                <Button icon="pi pi-trash" rounded severity="secondary"
+                  @click="confirmDeleteEspecEmbalagem(slotProps.data)" />
+              </template>
+            </Column>
+          </DataTable>
+          <Toolbar class="mb-4">
+            <template #start>
+              <Button label="Nova" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewEspecEmbalagem" />
+            </template>
+          </Toolbar>
+        </div>
+        <div>
+          <Dialog id="embdialog" v-model:visible="especDialogEmbalagem" :style="{ width: '450px' }"
+            header="Novo custo de embalagem" :modal="true" class="p-fluid">
+            <div class="field">
+              <label for="microverde">Item</label>
+              <InputText id="item" v-model.trim="especdodialog.item" required="true" autofocus
+                :invalid="submitted && !especdodialog.item" />
+              <small class="p-error" v-if="submitted && !especdodialog.item">Esse campo não pode ficar em
+                branco</small>
+            </div>
+
+            <div class="field">
+              <label for="diasEmPilha">Valor</label>
+              <InputNumber id="valor" v-model="especdodialog.valor" required="true" mode="currency" currency="BRL"
+                locale="pt-BR" autofocus :invalid="submitted && !especdodialog.valor" />
+              <small class="p-error" v-if="submitted && !especdodialog.valor">Esse campo não pode ficar em
+                branco</small>
+            </div>
+            <template #footer>
+              <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogEspecEmbalagem" />
+              <Button label="Salvar" icon="pi pi-check" text @click="salvarNovaEspecEmbalagem" />
+            </template>
+          </Dialog>
+          <Dialog v-model:visible="deleteEspecDialogEmbalagem" :style="{ width: '450px' }" header="Confirmar"
+            :modal="true">
+            <div class="confirmation-content">
+              <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+              <span v-if="especdodialog">Tem certeza que deseja deletar <b>{{ especdodialog.item }}</b>?</span>
+            </div>
+            <template #footer>
+              <Button label="Não" icon="pi pi-times" text @click="deleteEspecDialogEmbalagem = false" />
+              <Button label="Sim" icon="pi pi-check" text @click="deleteEspecEmbalagem" />
+            </template>
+          </Dialog>
+        </div>
+      </TabPanel>
 
     </TabView>
   </div>
@@ -274,7 +520,7 @@ import Checkbox from 'primevue/checkbox';
 
 import { useSementesStore } from '../stores/sementes';
 import { useLotesStore } from '../stores/lotes';
-
+import { useBlocosStore } from '../stores/blocos';
 import { useEspecsStore } from '../stores/especs';
 import { Timestamp } from 'firebase/firestore';
 
@@ -286,19 +532,14 @@ import { onBeforeMount, onMounted, onUpdated, ref, watch, computed } from 'vue';
 
 const sementesStore = useSementesStore();
 const lotesStore = useLotesStore();
-
+const blocosStore = useBlocosStore();
 const especsStore = useEspecsStore();
 
-const destrinchaLotes = computed(() => {
-  return lotesStore.lotes.map(lote => {
-    return lote.plantios.map(plantio => {
-      return { lote: lote, plantio: plantio };
-    });
-  }).flat();
-});
 
-
-
+const colunasEspecs = ref([
+  { field: 'item', header: 'Item' },
+  { field: 'valor', header: 'Valor' },
+]);
 
 const dias = ref([
   { dia: 'Domingo' },
@@ -310,6 +551,13 @@ const dias = ref([
   { dia: 'Sábado' },
 ]);
 
+const microverdeEFornecedor = (semente) => {
+  if (!semente) { return ''; }
+  else
+    return semente.microverde;
+};
+
+const datasSemana = ref([{ data: new Date() }, { data: new Date() }, { data: new Date() }, { data: new Date() }, { data: new Date() }, { data: new Date() }, { data: new Date() }]);
 
 
 const mes = ref(new Date());
@@ -317,16 +565,23 @@ const mes = ref(new Date());
 
 
 
+const selectedTipoLote = ref();
+const selectedEspec = ref();
+const databloco = ref();
+
+const optionsLote = ref([{ tipo: 'Mix' }, { tipo: 'Microverde' },])
+
+
 
 const ehEdit = ref(false);
-
+const ehEditBloco = ref(false);
 const ehEditLote = ref(false);
 
-
+const blocododialog = ref({});
 const lotedodialog = ref({});
 const lotesimplesdodialog = ref({});
 
-
+const blocoDialog = ref(false);
 const loteDialog = ref(false);
 const loteSimplesDialog = ref(false);
 
@@ -354,22 +609,26 @@ const openNewLote = () => {
   loteDialog.value = true;
 };
 
-// optionsSementes é um array de objetos {label: string, value: string} onde label é o 'nome - created'  e value é a semente e é resultado da filtragem de sementesStore.sementes onde semente.disponivel é true
-// o created está em timestamp e é convertido para string com o toLocaleDateString	
+const insertblocodialog = ref(false)
+const insertblocododialog = ref({})
 
-const optionsSementes = computed(() => {
-
-  return sementesStore.sementes.filter(semente => semente.disponivel).map(semente => {
-    console.log(semente);
-    return { label: semente.microverde + ' - ' + semente.created.toDate().toLocaleDateString(), value: semente };
-  });
-});
-
+const insertBloco = () => {
+  insertblocododialog.value = {};
+  submitted.value = false;
+  insertblocodialog.value = true;
+};
 
 
 const plantiosdoDialogBloco = ref([]);
 
 
+const openNewBloco = () => {
+  ehEditBloco.value = false;
+  plantiosdoDialogBloco.value = [];
+  blocododialog.value = {};
+  submitted.value = false;
+  blocoDialog.value = true;
+};
 
 const hideDialogLote = () => {
   loteDialog.value = false;
@@ -385,29 +644,34 @@ const hideDialogLoteSimples = () => {
   plantiosdoDialogsimples.value = [];
 };
 
+const hideDialogBloco = () => {
+  blocoDialog.value = false;
+  blocododialog.value = {};
+  submitted.value = false;
+  plantiosdoDialogBloco.value = [];
+};
 
+const hideInsertBlocoDialog = () => {
+  insertblocodialog.value = false;
+  insertblocododialog.value = {};
+  submitted.value = false;
+};
 
 
 const openNewLoteSimples = (dia, data) => {
   console.log(dia);
   console.log(data.toLocaleDateString());
   lotesimplesdodialog.value = { nome: '', data: data };
-
-
   submitted.value = false;
   loteSimplesDialog.value = true;
 };
 
 const salvarNovoLoteSimples = () => {
   submitted.value = true;
-
-
-
   if (lotesimplesdodialog.value.nome) {
     plantiosdoDialogsimples.value.forEach(plantio => {
       //encontra a espec semente daquela semente
-      let especPlantio = plantio.semente.especSemente
-
+      let especPlantio = sementesStore.especSementes.find((espec) => espec.id == plantio.semente.especSemente);
       //pega no especPlantio a gramas por bandeja
       plantio.gramasBandejaPlantio = especPlantio.gramasBandejaPlantio;
 
@@ -426,7 +690,12 @@ const salvarNovoLoteSimples = () => {
         //adiciona os dias de colheita na data de semeadura de acordo com o especPlantio
         plantio.dataColheita = new Date(lotesimplesdodialog.value.data);
         plantio.dataColheita.setDate(plantio.dataColheita.getDate() + especPlantio.diasAteAColheita);
+
+
+
+
         console.log(plantio.dataColheita);
+
 
       }
 
@@ -475,10 +744,9 @@ const salvarNovoLote = () => {
   if (lotedodialog.value.nome) {
     plantiosdoDialog.value.forEach(plantio => {
       //encontra a espec semente daquela semente
-      let especPlantio = plantio.semente.especSemente
+      let especPlantio = sementesStore.especSementes.find((espec) => espec.id == plantio.semente.especSemente);
 
       //pega no especPlantio a gramas por bandeja
-
       plantio.gramasBandejaPlantio = especPlantio.gramasBandejaPlantio;
 
       //calcula datas de plantio, blackout e estufa
@@ -527,8 +795,32 @@ const salvarNovoLote = () => {
   }
 };
 
+const salvarInsertBloco = () => {
+  submitted.value = true;
+
+  if (insertblocododialog.value.bloco) {
+    const bloco = { ...insertblocododialog.value, dataColheita: insertblocododialog.value.dataColheita, plantios: insertblocododialog.value.bloco.plantios };
+
+    blocosStore.addBloco(bloco);
+
+    hideInsertBlocoDialog();
+  }
+}
+
+const salvarNovoBloco = () => {
+  submitted.value = true;
+
+  if (blocododialog.value.nome) {
+    const bloco = { ...blocododialog.value, plantios: plantiosdoDialogBloco.value };
 
 
+
+
+    blocosStore.addBloco(bloco);
+
+    hideDialogBloco();
+  }
+}
 
 
 
@@ -559,6 +851,9 @@ const addplantio = () => {
   plantiosdoDialog.value.push({ selectedCustosPlantio: [] });
 };
 
+const addplantiobloco = () => {
+  plantiosdoDialogBloco.value.push({});
+};
 
 const addplantiosimples = () => {
   plantiosdoDialogsimples.value.push({});
@@ -570,7 +865,9 @@ const removeplantio = (plantio) => {
 const removeplantiosimples = (plantio) => {
   plantiosdoDialogsimples.value = plantiosdoDialogsimples.value.filter(p => p !== plantio);
 };
-
+const removeplantiobloco = (plantio) => {
+  plantiosdoDialogBloco.value = plantiosdoDialogBloco.value.filter(p => p !== plantio);
+};
 
 const diasSemana = ref([
   { dia: 'Domingo' },
@@ -703,7 +1000,9 @@ const openNewEspecEmbalagem = () => {
   lotes.value = useLotesStore().lotes;
 }; */
 
-
+const anos = ref([])
+const meses = ref([]);
+const temPlantioNoMes = ref(false);
 
 
 watch(() => mes.value, () => {
@@ -798,6 +1097,11 @@ const preenchePlantiosDict = () => {
       let dataIdaBlackout = plantio.dataIdaBlackout.toDate();
       let dataIdaEstufa = plantio.dataIdaEstufa.toDate();
 
+      if (!plantiosDict.value[dataColheita]) {
+        plantiosDict.value[dataColheita] = [];
+      }
+      plantiosDict.value[dataColheita].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'COLHEITA', loteId: lote.id, indexPlantio: index });
+
       if (!plantiosDict.value[dataSemeadura]) {
         plantiosDict.value[dataSemeadura] = [];
       }
@@ -806,28 +1110,19 @@ const preenchePlantiosDict = () => {
       if (!plantiosDict.value[dataIdaBlackout]) {
         plantiosDict.value[dataIdaBlackout] = [];
       }
-      // se a data de ida do blackout for igual a data de estufa, não adiciona o blackout
-      if (dataIdaBlackout.getTime() != dataIdaEstufa.getTime())
-        plantiosDict.value[dataIdaBlackout].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'BLACKOUT', loteId: lote.id, indexPlantio: index });
+      plantiosDict.value[dataIdaBlackout].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'BLACKOUT', loteId: lote.id, indexPlantio: index });
 
       if (!plantiosDict.value[dataIdaEstufa]) {
         plantiosDict.value[dataIdaEstufa] = [];
       }
       plantiosDict.value[dataIdaEstufa].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'ESTUFA', loteId: lote.id, indexPlantio: index });
-
-
-      if (!plantiosDict.value[dataColheita]) {
-        plantiosDict.value[dataColheita] = [];
-      }
-      plantiosDict.value[dataColheita].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'COLHEITA', loteId: lote.id, indexPlantio: index });
-
     });
   });
 };
 
 
 
-/* const calculaSemanas = () => {
+const calculaSemanas = () => {
   meses.value = [];
   lotesStore.lotes.forEach(lote => {
     lote.plantios.forEach(plantio => {
@@ -889,7 +1184,7 @@ const preenchePlantiosDict = () => {
 
 
 
-}; */
+};
 
 
 
@@ -900,7 +1195,7 @@ onBeforeMount(() => {
   sementesStore.fetchEspecSementes();
   lotesStore.fetchLotes()
 
-
+  blocosStore.fetchBlocos();
   especsStore.fetchEspecPlantio();
   especsStore.fetchEspecEmbalagens();
 

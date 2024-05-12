@@ -48,6 +48,7 @@ export const useLotesStore = defineStore("lotes", {
     },
 
     async setaLote(s) {
+      console.log("setaLote", s);
       try {
         const docref = doc(db, "lotes", s.id);
         let index = this.lotes.findIndex((lote) => s.id == lote.id);

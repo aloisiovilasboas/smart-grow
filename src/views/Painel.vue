@@ -3,7 +3,7 @@
         <TabPanel header="Para Semeadura">
             <DataTable :value="emSemeadura">
                 <Column field="lote.nome" header="Lote"></Column>
-                <Column field="plantio.semente.microverde" header="Microverde"></Column>
+                <Column field="plantio.microverde" header="Microverde"></Column>
 
                 <Column field="plantio.gramasBandejaPlantio" header="Gramas de Sementes por Bandeja"
                     style="text-align: center"></Column>
@@ -30,7 +30,7 @@
         <TabPanel header="Para Blackout">
             <DataTable :value="emBlackout">
                 <Column field="lote.nome" header="Lote"></Column>
-                <Column field="plantio.semente.microverde" header="Microverde"></Column>
+                <Column field="plantio.microverde" header="Microverde"></Column>
 
 
 
@@ -56,7 +56,7 @@
         <TabPanel header="Para Estufa">
             <DataTable :value="emEstufa">
                 <Column field="lote.nome" header="Lote"></Column>
-                <Column field="plantio.semente.microverde" header="Microverde"></Column>
+                <Column field="plantio.microverde" header="Microverde"></Column>
 
 
 
@@ -81,7 +81,7 @@
         <TabPanel header="Para Colheita">
             <DataTable :value="emColheita">
                 <Column field="lote.nome" header="Lote"></Column>
-                <Column field="plantio.semente.microverde" header="Microverde"></Column>
+                <Column field="plantio.microverde" header="Microverde"></Column>
 
 
 
@@ -106,7 +106,7 @@
         <TabPanel header="Sem Pendência">
             <DataTable :value="semPendencia">
                 <Column field="lote.nome" header="Lote"></Column>
-                <Column field="plantio.semente.microverde" header="Microverde"></Column>
+                <Column field="plantio.microverde" header="Microverde"></Column>
                 <Column field="plantio.dataSemeadura" header="Data de Semeadura">
                     <template #body="slotProps">
                         <span>{{ slotProps.data.plantio.dataSemeadura.toDate().toLocaleDateString() }}</span>

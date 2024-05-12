@@ -155,9 +155,8 @@
       </div>
       <div class="field" v-if="ehEdit">
         <label for="disponivel"> Disponível </label>
-        <Dropdown id="disponivel" v-model="sementedodialog.disponivel" filter :options="disponivelList"
-          optionLabel="label" optionValue="value" placeholder="Disponível"
-          :invalid="submitted && !sementedodialog.disponivel" />
+        <Dropdown id="disponivel" v-model="sementedodialog.disponivel" :options="disponivelList" optionLabel="label"
+          optionValue="value" :invalid="submitted && !sementedodialog.disponivel" />
         <small class="p-error" v-if="submitted && !sementedodialog.disponivel">Esse campo não pode ficar em
           branco</small>
       </div>

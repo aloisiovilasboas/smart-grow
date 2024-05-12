@@ -95,9 +95,9 @@
                   <div class="flex flex-column">
                     <div class="field">
                       <label for="microverde">Microverde</label>
-                      <Dropdown v-model="plantio.semente" :options="optionsSementes" optionLabel="label" filter
+                      <Dropdown v-model="plantio.idSemente" :options="optionsSementes" optionLabel="label" filter
                         optionValue="value" placeholder="Microverde" checkmark :highlightOnSelect="false" />
-                      <small class="p-error" v-if="submitted && !plantio.semente">Esse campo não pode ficar em
+                      <small class="p-error" v-if="submitted && !plantio.idSemente">Esse campo não pode ficar em
                         branco</small>
                     </div>
                     <div class="field">
@@ -154,9 +154,9 @@
                   <div class="flex flex-column">
                     <div class="field">
                       <label for="microverde">Microverde</label>
-                      <Dropdown v-model="plantio.semente" :options="optionsSementes" optionLabel="label" filter
+                      <Dropdown v-model="plantio.idSemente" :options="optionsSementes" optionLabel="label" filter
                         optionValue="value" placeholder="Microverde" checkmark :highlightOnSelect="false" />
-                      <small class="p-error" v-if="submitted && !plantio.semente">Esse campo não pode ficar em
+                      <small class="p-error" v-if="submitted && !plantio.idSemente">Esse campo não pode ficar em
                         branco</small>
                     </div>
                     <div class="field">
@@ -204,8 +204,13 @@
         </div>
         <div>
           <DataTable :value="destrinchaLotes">
+            <Column :exportable="false" style="min-width:5rem">
+              <template #body="slotProps">
+                <Button icon="pi pi-trash" rounded severity="secondary" @click="confirmDeletePlantio(slotProps.data)" />
+              </template>
+            </Column>
             <Column field="lote.nome" header="Lote"></Column>
-            <Column field="plantio.semente.microverde" header="Microverde"></Column>
+            <Column field="plantio.microverde" header="Microverde"></Column>
             <Column field="plantio.dataSemeadura" header="Data de Semeadura">
               <template #body="slotProps">
                 <span>{{ slotProps.data.plantio.dataSemeadura.toDate().toLocaleDateString() }}</span>
@@ -226,10 +231,6 @@
                 <span>{{ slotProps.data.plantio.dataIdaEstufa.toDate().toLocaleDateString() }}</span>
               </template>
             </Column>
-
-
-
-
             <Column field="plantio.dataColheita" header="Data de Colheita">
               <template #body="slotProps">
                 <span>{{ slotProps.data.plantio.dataColheita.toDate().toLocaleDateString() }}</span>
@@ -241,6 +242,18 @@
             <Column field="plantio.estado" header="Estado" style="text-align: center">
             </Column>
           </DataTable>
+
+          <Dialog v-model:visible="deleteLoteDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
+            <div class="confirmation-content">
+              <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+              <span v-if="lotedodialog">Tem certeza que deseja excluir o plantio <b>{{ lotedodialog.plantio.microverde
+                  }} de colheita em {{ lotedodialog.plantio.dataColheita.toDate().toLocaleDateString() }}</b>?</span>
+            </div>
+            <template #footer>
+              <Button label="Não" icon="pi pi-times" text @click="deleteLoteDialog = false" />
+              <Button label="Sim" icon="pi pi-check" text @click="deletePlantio" />
+            </template>
+          </Dialog>
         </div>
       </TabPanel>
 
@@ -326,6 +339,8 @@ const ehEditLote = ref(false);
 const lotedodialog = ref({});
 const lotesimplesdodialog = ref({});
 
+const deleteLoteDialog = ref(false);
+
 
 const loteDialog = ref(false);
 const loteSimplesDialog = ref(false);
@@ -360,8 +375,10 @@ const openNewLote = () => {
 const optionsSementes = computed(() => {
 
   return sementesStore.sementes.filter(semente => semente.disponivel).map(semente => {
-    console.log(semente);
-    return { label: semente.microverde + ' - ' + semente.created.toDate().toLocaleDateString(), value: semente };
+
+    let s = { label: semente.microverde + ' - ' + semente.created.toDate().toLocaleDateString(), value: semente.id }
+    console.log(s);
+    return s;
   });
 });
 
@@ -405,11 +422,23 @@ const salvarNovoLoteSimples = () => {
 
   if (lotesimplesdodialog.value.nome) {
     plantiosdoDialogsimples.value.forEach(plantio => {
-      //encontra a espec semente daquela semente
-      let especPlantio = plantio.semente.especSemente
+      //encontra a semente daquele id
+      let plantiosemente = sementesStore.sementes.find(semente => semente.id == plantio.idSemente);
+      let especPlantio = plantiosemente.especSemente
 
-      //pega no especPlantio a gramas por bandeja
+
+
+      plantio.microverde = plantiosemente.microverde;
       plantio.gramasBandejaPlantio = especPlantio.gramasBandejaPlantio;
+      plantio.cobertura = especPlantio.cobertura;
+      plantio.distincao = especPlantio.distincao;
+      plantio.hidratacao = especPlantio.hidratacao;
+      plantio.mix = especPlantio.mix;
+      plantio.peso = especPlantio.peso;
+      plantio.idEspecPlantio = especPlantio.id;
+
+
+
 
       //calcula datas de plantio, blackout e estufa
       //data do plantio: data da colheita menos a quantidade de dias que está na espec semente
@@ -421,8 +450,6 @@ const salvarNovoLoteSimples = () => {
       if (lotesimplesdodialog.value.tipo == 'Colheita') {
         plantio.dataColheita = new Date(lotesimplesdodialog.value.data);
       } else {
-        console.log('entrou no else');
-        console.log(especPlantio.diasAteAColheita);
         //adiciona os dias de colheita na data de semeadura de acordo com o especPlantio
         plantio.dataColheita = new Date(lotesimplesdodialog.value.data);
         plantio.dataColheita.setDate(plantio.dataColheita.getDate() + especPlantio.diasAteAColheita);
@@ -450,12 +477,12 @@ const salvarNovoLoteSimples = () => {
 
       plantio.estado = 'Pré-plantio';
 
-      delete plantio.semente.valorBruto
-      delete plantio.semente.percentualICMS
-      delete plantio.semente.fornecedor
+
 
     });
     const lote = { ...lotesimplesdodialog.value, plantios: plantiosdoDialogsimples.value };
+    delete lote.data;
+    delete lote.tipo;
 
     lotesStore.addLote(lote).then(() => {
 
@@ -474,12 +501,21 @@ const salvarNovoLote = () => {
 
   if (lotedodialog.value.nome) {
     plantiosdoDialog.value.forEach(plantio => {
-      //encontra a espec semente daquela semente
-      let especPlantio = plantio.semente.especSemente
+      console.log(plantio);
+      //encontra a semente daquele id
+      let plantiosemente = sementesStore.sementes.find(semente => semente.id == plantio.idSemente);
+      let especPlantio = plantiosemente.especSemente
 
-      //pega no especPlantio a gramas por bandeja
 
+
+      plantio.microverde = plantiosemente.microverde;
       plantio.gramasBandejaPlantio = especPlantio.gramasBandejaPlantio;
+      plantio.cobertura = especPlantio.cobertura;
+      plantio.distincao = especPlantio.distincao;
+      plantio.hidratacao = especPlantio.hidratacao;
+      plantio.mix = especPlantio.mix;
+      plantio.peso = especPlantio.peso;
+      plantio.idEspecPlantio = especPlantio.id;
 
       //calcula datas de plantio, blackout e estufa
       //data do plantio: data da colheita menos a quantidade de dias que está na espec semente
@@ -503,15 +539,12 @@ const salvarNovoLote = () => {
 
       plantio.estado = 'Pré-plantio';
 
-      delete plantio.semente.valorBruto
-      delete plantio.semente.percentualICMS
-      delete plantio.semente.fornecedor
 
-
-      for (let i = 0; i < plantio.selectedCustosPlantio.length; i++) {
-        let custo = especsStore.especPlantio.find((espec) => espec.item == plantio.selectedCustosPlantio[i]);
-        plantio.selectedCustosPlantio[i] = { item: custo.item, valor: custo.valor };
-      }
+      /* 
+            for (let i = 0; i < plantio.selectedCustosPlantio.length; i++) {
+              let custo = especsStore.especPlantio.find((espec) => espec.item == plantio.selectedCustosPlantio[i]);
+              plantio.selectedCustosPlantio[i] = { item: custo.item, valor: custo.valor };
+            } */
 
     });
     const lote = { ...lotedodialog.value, plantios: plantiosdoDialog.value };
@@ -527,8 +560,42 @@ const salvarNovoLote = () => {
   }
 };
 
+const confirmDeletePlantio = (lote) => {
+  console.log(lote.plantio.microverde);
+  lotedodialog.value = lote;
+  deleteLoteDialog.value = true;
+};
+
+const confirmDeleteEspec = (es) => {
+  especdodialog.value = es;
+  deleteEspecDialog.value = true;
+};
+
+const deletePlantio = () => {
+  console.log(lotedodialog.value);
+  deleteLoteDialog.value = false;
+  //verifica se o lote tem mais de um plantio, se sim, deleta o plantio, se não, deleta o lote
+  if (lotedodialog.value.lote.plantios.length > 1) {
+    // deleta o plantio do lote em lotedodialog e atualiza o lote no banco com o setaLote de lotesStore
+    lotedodialog.value.lote.plantios = lotedodialog.value.lote.plantios.filter(plantio => plantio !== lotedodialog.value.plantio);
+    console.log(lotedodialog.value.lote);
+    lotesStore.setaLote(lotedodialog.value.lote);
 
 
+
+  } else {
+    lotesStore.deletaLote(lotedodialog.value.lote);
+  }
+
+  lotedodialog.value = {};
+};
+
+const deleteEspec = () => {
+
+  deleteEspecDialog.value = false;
+  sementesStore.deletaEspecSemente(especdodialog.value)
+  especdodialog.value = {};
+};
 
 
 
@@ -801,25 +868,25 @@ const preenchePlantiosDict = () => {
       if (!plantiosDict.value[dataSemeadura]) {
         plantiosDict.value[dataSemeadura] = [];
       }
-      plantiosDict.value[dataSemeadura].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'SEMEADURA', loteId: lote.id, indexPlantio: index });
+      plantiosDict.value[dataSemeadura].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'SEMEADURA', loteId: lote.id, indexPlantio: index });
 
       if (!plantiosDict.value[dataIdaBlackout]) {
         plantiosDict.value[dataIdaBlackout] = [];
       }
       // se a data de ida do blackout for igual a data de estufa, não adiciona o blackout
       if (dataIdaBlackout.getTime() != dataIdaEstufa.getTime())
-        plantiosDict.value[dataIdaBlackout].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'BLACKOUT', loteId: lote.id, indexPlantio: index });
+        plantiosDict.value[dataIdaBlackout].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'BLACKOUT', loteId: lote.id, indexPlantio: index });
 
       if (!plantiosDict.value[dataIdaEstufa]) {
         plantiosDict.value[dataIdaEstufa] = [];
       }
-      plantiosDict.value[dataIdaEstufa].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'ESTUFA', loteId: lote.id, indexPlantio: index });
+      plantiosDict.value[dataIdaEstufa].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'ESTUFA', loteId: lote.id, indexPlantio: index });
 
 
       if (!plantiosDict.value[dataColheita]) {
         plantiosDict.value[dataColheita] = [];
       }
-      plantiosDict.value[dataColheita].push({ lote: lote.nome, plantio: plantio.semente.microverde, acao: 'COLHEITA', loteId: lote.id, indexPlantio: index });
+      plantiosDict.value[dataColheita].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'COLHEITA', loteId: lote.id, indexPlantio: index });
 
     });
   });

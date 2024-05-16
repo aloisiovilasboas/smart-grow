@@ -7,15 +7,15 @@
 
  -->
     <div>
-        <Card class="Login">
+        <Card class="inscricao">
             <template #header>
-                <img src="../assets/cultiveselogo.webp" />
+                <img src="../assets/cultivesePrancheta.png" width="100%" />
 
-                <h2>{{ 'nome: ' + userStore.user.nome }}</h2>
-                <h2>{{ 'email: ' + userStore.user.email }}</h2>
-                <h2>{{ 'telefone: ' + userStore.user.telefone }}</h2>
+                <h3>{{ userStore.user.nome }}</h3>
+                <h3>{{ userStore.user.email }}</h3>
+                <h3>{{ userStore.user.telefone }}</h3>
 
-                <h3>#todo tabela de atividades</h3>
+                <!--        <h3>#todo tabela de atividades</h3> -->
 
             </template>
 

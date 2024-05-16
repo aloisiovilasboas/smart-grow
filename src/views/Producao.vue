@@ -1,5 +1,8 @@
 <template>
-  <div class="flex flex-column " style="min-width: 700px;">
+  <Button @click="exportarEtiquetas" label="Exportar Etiquetas" icon="pi pi-download"
+    class="p-button-rounded p-button-success" />
+
+  <div class="flex flex-column " style="min-width: 1100px;">
     <TabView>
       <TabPanel header="Calendário">
 
@@ -45,9 +48,18 @@
                     <div v-for="acao in semana.dias[index]" :key="acao" style="padding: 0.5rem;">
                       <div @click="clickTarefaCard(acao)" class="cardTarefas"
                         :style="{ 'background-color': achaBG(acao.acao) }">
-                        <span class="word-large">{{ acao.plantio }}</span>
-                        <span class="word-small">{{ acao.lote }}</span>
-                        <span class="word-acao">{{ acao.acao }}</span>
+                        <!-- abaixo, acao.plantio e ao lado um circulo com o numero de bandejas -->
+                        <div class="flex flex-row gap-3 ">
+                          <div class="flex flex-column ">
+                            <span class="word-large">{{ acao.plantio }}</span>
+                            <span class="word-small">{{ acao.lote }}</span>
+                            <span class="word-acao">{{ acao.acao }}</span>
+                          </div>
+                          <div class="flex flex-column" style="align-items: center; justify-content: center;">
+                            <Badge :value=acao.numBandejas />
+                          </div>
+                        </div>
+
                       </div>
                     </div>
                   </div>
@@ -221,7 +233,7 @@
                 <!-- v-if data de blackout é diferente da data de estufa  -->
                 <span
                   v-if="slotProps.data.plantio.dataIdaBlackout.toDate().getTime() != slotProps.data.plantio.dataIdaEstufa.toDate().getTime()">{{
-            slotProps.data.plantio.dataIdaBlackout.toDate().toLocaleDateString() }}</span>
+    slotProps.data.plantio.dataIdaBlackout.toDate().toLocaleDateString() }}</span>
                 <!-- v-else  -->
                 <span v-else> Direto para Estufa </span>
               </template>
@@ -274,6 +286,7 @@ import Card from 'primevue/card';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
+import Badge from 'primevue/badge';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Toolbar from 'primevue/toolbar';
@@ -579,16 +592,55 @@ const deletePlantio = () => {
     // deleta o plantio do lote em lotedodialog e atualiza o lote no banco com o setaLote de lotesStore
     lotedodialog.value.lote.plantios = lotedodialog.value.lote.plantios.filter(plantio => plantio !== lotedodialog.value.plantio);
     console.log(lotedodialog.value.lote);
-    lotesStore.setaLote(lotedodialog.value.lote);
-
-
-
+    lotesStore.setaLote(lotedodialog.value.lote).then(() => {
+      preenchePlantiosDict();
+      mes.value = new Date(mes.value);
+    })
   } else {
-    lotesStore.deletaLote(lotedodialog.value.lote);
+    lotesStore.deletaLote(lotedodialog.value.lote).then(() => {
+      preenchePlantiosDict();
+      mes.value = new Date(mes.value);
+    });
   }
+
 
   lotedodialog.value = {};
 };
+
+// const fs = require('node:fs'); abaixo, usando import 
+import fs from 'fs';
+const content = 'Some content!';
+
+
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+const exportarEtiquetas = () => {
+  download('etiquetas.json', content);
+};
+
+const exportarEtiquetas1 = () => {
+  const blob = new Blob([content], { type: 'text/plain' })
+  const e = document.createEvent('MouseEvents'),
+    a = document.createElement('a');
+  a.download = "test.json";
+  a.href = window.URL.createObjectURL(blob);
+  a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+  e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+  a.dispatchEvent(e);
+};
+
 
 const deleteEspec = () => {
 
@@ -615,6 +667,8 @@ const achaBG = (acao) => {
 };
 
 // DD - SS
+const forcePreencher = ref(0)
+
 const semanasDoMesSelecionado = computed(() => {
   return preencheSemanasDoMes();
 })
@@ -760,19 +814,6 @@ const openNewEspecEmbalagem = () => {
 
 
 
-/* watch(() => lotesStore.lotes, () => {
-  geraLotesPeloLotesStore();
-});
- */
-//const lotes = ref([]);
-
-/* const geraLotesPeloLotesStore = () => {
-  lotes.value = useLotesStore().lotes;
-}; */
-
-
-
-
 watch(() => mes.value, () => {
   preencheSemanasDoMes();
 
@@ -828,25 +869,6 @@ const preencheSemanasDoMes = () => {
   return semanasDoMesSelecionado;
 }
 
-
-
-
-
-
-/* A estrutura dos meses se dará da seguinte forma:
-meses = [
-  [semana1, semana2, semana3, ...], // janeiro
-  [semana1, semana2, semana3, ...], // fevereiro
-  ...
-  [semana1, semana2, semana3, ...] // dezembro
-] onde semana = {diaInicio: Date, diaFim: Date, acoesplantios: [acaoplantio1, acaoplantio2, ...]}
- e onde acaoplantio = {lote: Lote, plantio: Plantio, acao: string}
- e onde acao = 'plantio', 'blackout', 'estufa', 'colheita'
- 
-A semana começa no domingo e termina no sábado
- 
-*/
-// watch lotes
 watch(() => lotesStore.lotes, () => {
   preenchePlantiosDict();
 });
@@ -868,96 +890,29 @@ const preenchePlantiosDict = () => {
       if (!plantiosDict.value[dataSemeadura]) {
         plantiosDict.value[dataSemeadura] = [];
       }
-      plantiosDict.value[dataSemeadura].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'SEMEADURA', loteId: lote.id, indexPlantio: index });
+      plantiosDict.value[dataSemeadura].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'SEMEADURA', loteId: lote.id, indexPlantio: index, numBandejas: plantio.numBandejas });
 
       if (!plantiosDict.value[dataIdaBlackout]) {
         plantiosDict.value[dataIdaBlackout] = [];
       }
       // se a data de ida do blackout for igual a data de estufa, não adiciona o blackout
       if (dataIdaBlackout.getTime() != dataIdaEstufa.getTime())
-        plantiosDict.value[dataIdaBlackout].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'BLACKOUT', loteId: lote.id, indexPlantio: index });
+        plantiosDict.value[dataIdaBlackout].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'BLACKOUT', loteId: lote.id, indexPlantio: index, numBandejas: plantio.numBandejas });
 
       if (!plantiosDict.value[dataIdaEstufa]) {
         plantiosDict.value[dataIdaEstufa] = [];
       }
-      plantiosDict.value[dataIdaEstufa].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'ESTUFA', loteId: lote.id, indexPlantio: index });
+      plantiosDict.value[dataIdaEstufa].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'ESTUFA', loteId: lote.id, indexPlantio: index, numBandejas: plantio.numBandejas });
 
 
       if (!plantiosDict.value[dataColheita]) {
         plantiosDict.value[dataColheita] = [];
       }
-      plantiosDict.value[dataColheita].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'COLHEITA', loteId: lote.id, indexPlantio: index });
+      plantiosDict.value[dataColheita].push({ lote: lote.nome, plantio: plantio.microverde, acao: 'COLHEITA', loteId: lote.id, indexPlantio: index, numBandejas: plantio.numBandejas });
 
     });
   });
 };
-
-
-
-/* const calculaSemanas = () => {
-  meses.value = [];
-  lotesStore.lotes.forEach(lote => {
-    lote.plantios.forEach(plantio => {
-      let dataColheita = plantio.dataColheita.toDate();
-      let dataSemeadura = plantio.dataSemeadura.toDate();
-      let dataIdaBlackout = plantio.dataIdaBlackout.toDate();
-      let dataIdaEstufa = plantio.dataIdaEstufa.toDate();
-
-      let datas = [{ acao: 'SEMEADURA', data: dataSemeadura }, { acao: 'BLACKOUT', data: dataIdaBlackout }, { acao: 'ESTUFA', data: dataIdaEstufa }, { acao: 'COLHEITA', data: dataColheita }];
-      datas.forEach(data => {
-
-
-        //Calcula o primeiro dia da semana de acordo com a data.data
-        var diaSemana = data.data.getDay();
-        var inicioSemana = new Date(data.data);
-        inicioSemana.setDate(data.data.getDate() - diaSemana);
-        var finalSemana = new Date(inicioSemana);
-        finalSemana.setDate(inicioSemana.getDate() + 6);
-
-
-        var numMes = inicioSemana.getMonth();
-
-        //se em 'meses[numMes]', onde numMes é o mes do diaInicio da semana, não existir a semana, cria um array vazio, cria a semana e adiciona a acao; senão, adiciona a acao
-        if (!meses.value[numMes]) {
-          let semana = { diaInicio: inicioSemana.getDate(), dias: [[], [], [], [], [], [], []] };
-          semana.dias[data.data.getDay()] = [{ data: data.data, lote: lote.nome, plantio: plantio.semente.microverde, acao: data.acao }];
-          meses.value[numMes] = [];
-          //pega o dia do mes do inicio da semana para usar de indice no objeto mes para adicionar a semana no mes
-          meses.value[numMes][inicioSemana.getDate()] = semana;
-          meses.value[numMes].semanas = [{ domingo: inicioSemana.getDate(), domingoDate: inicioSemana, titulo: (inicioSemana.toLocaleDateString().slice(0, -5) + ' - ' + finalSemana.toLocaleDateString()).slice(0, -5) }];
-          //meses.value[numMes] = {  inicioSemana = semana}
-        } else {
-          //se a semana já existir, adiciona a acao a semana, senão, cria um array vazio e adiciona a acao
-          if (!meses.value[numMes][inicioSemana.getDate()]) {
-            let semana = { diaInicio: inicioSemana.getDate(), dias: [[], [], [], [], [], [], []] };
-            semana.dias[data.data.getDay()] = [{ data: data.data, lote: lote.nome, plantio: plantio.semente.microverde, acao: data.acao }];
-            meses.value[numMes][inicioSemana.getDate()] = semana;
-            meses.value[numMes].semanas.push({ domingo: inicioSemana.getDate(), domingoDate: inicioSemana, titulo: (inicioSemana.toLocaleDateString().slice(0, -5) + ' - ' + finalSemana.toLocaleDateString()).slice(0, -5) });
-          } else {
-            if (!meses.value[numMes][inicioSemana.getDate()].dias[data.data.getDay()]) {
-              meses.value[numMes][inicioSemana.getDate()].dias[data.data.getDay()] = [{ data: data.data, lote: lote.nome, plantio: plantio.semente.microverde, acao: data.acao }];
-            }
-            else {
-              meses.value[numMes][inicioSemana.getDate()].dias[data.data.getDay()].push({ data: data.data, lote: lote.nome, plantio: plantio.semente.microverde, acao: data.acao });
-            }
-          }
-        }
-      });
-    });
-  });
-  //ordena cada semana de cada mes por data
-  meses.value.forEach(mes => {
-
-    //transforma domingo em numero
-    mes.semanas.sort((a, b) => a.domingo - b.domingo);
-
-
-  });
-
-
-
-}; */
-
 
 
 onBeforeMount(() => {

@@ -2,9 +2,9 @@
     <!-- <h1>Entre {{ $route.params.id }} </h1> -->
 
     <div>
-        <Card class="Cadastre-se">
+        <Card class="inscricao">
             <template #header>
-                <img src="../assets/cultiveselogo.webp" />
+                <img src="../assets/cultivesePrancheta.png" width="100%" />
 
             </template>
             <!--  <template #title>

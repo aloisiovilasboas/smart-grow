@@ -7,10 +7,11 @@
 
  -->
     <div>
-        <Card class="Login">
+        <Card class="inscricao">
             <template #header>
-                <img src="../assets/cultiveselogo.webp" />
-
+                <div>
+                    <img src="../assets/cultivesePrancheta.png" width="100%" />
+                </div>
             </template>
             <!--  <template #title>
                 Entre

@@ -9,7 +9,7 @@
     <div>
         <!--  <Card class="Login">
             <template #header>
-                <img src="../assets/cultiveselogo.webp" />
+                <img src="../assets/cultivesePrancheta.png" />
 
             </template>
 
@@ -18,7 +18,8 @@
 </Card> -->
         <Card class="inscricao">
             <template #header>
-                <img src="../assets/cultiveselogo.webp" width="100%" />
+
+                <img src="../assets/cultivesePrancheta.png" width="100%" />
                 <!--     <img src="../assets/imgs/rascunho.png"  /> -->
             </template>
             <template #title>

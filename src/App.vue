@@ -21,8 +21,9 @@
             <!-- # router link para o home com a logo -->
             <router-link to="/" @click.native="InlineButtonClickHandler">
               <Button class="p-button-text button-sidebar">
-                <span class="p-button-icon p-button-icon-left"><img src="./assets/cultiveselogo.webp"
-                    height="50"></span>
+                <!--  span abaixo com a imagem no centro -->
+                <span style="width: 100%; text-align: center"><img src="./assets/cultivesePrancheta.png" height="50">
+                </span>
               </Button>
             </router-link>
             <!-- um router link para cada intem na lista de links chamada links utilizando v-for -->
